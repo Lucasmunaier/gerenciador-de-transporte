@@ -15,18 +15,14 @@ export const AppProvider = ({ children, user }: AppProviderProps) => {
     const [trips, setTrips] = useState<Trip[]>([]);
     const [fuelLogs, setFuelLogs] = useState<FuelLog[]>([]);
 
-    // Função central que busca os dados e recalcula o consumo
     const fetchData = async () => {
         if (!user) return;
         
-        // Busca de dados brutos
         const { data: pData, error: pError } = await supabase.from('passengers').select('*');
-        if (pError) console.error('Erro ao buscar passageiros:', pError);
-        else setPassengers(pData || []);
+        if (pError) console.error('Erro ao buscar passageiros:', pError); else setPassengers(pData || []);
         
         const { data: tData, error: tError } = await supabase.from('trips').select('*');
-        if (tError) console.error('Erro ao buscar viagens:', tError);
-        else setTrips(tData || []);
+        if (tError) console.error('Erro ao buscar viagens:', tError); else setTrips(tData || []);
 
         const { data: rawFuelLogs, error: fError } = await supabase.from('fuel_logs').select('*').order('odometer', { ascending: true });
         if (fError) {
@@ -35,18 +31,22 @@ export const AppProvider = ({ children, user }: AppProviderProps) => {
             return;
         }
 
-        // Lógica de Recálculo de Consumo
+        // LÓGICA DE CÁLCULO DE CONSUMO CORRIGIDA
         const calculatedFuelLogs = (rawFuelLogs || []).map((log, index, allLogs) => {
             if (index === 0) {
-                return { ...log, km_per_liter: null }; // O primeiro registro não tem como calcular
+                return { ...log, km_per_liter: null };
             }
             const prevLog = allLogs[index - 1];
             const kmTraveled = log.odometer - prevLog.odometer;
-            const kmPerLiter = (kmTraveled > 0 && log.liters > 0) ? parseFloat((kmTraveled / log.liters).toFixed(2)) : null;
+            
+            // CORREÇÃO: Agora divide os km rodados pelos litros do ABASTECIMENTO ANTERIOR.
+            const kmPerLiter = (kmTraveled > 0 && prevLog.liters > 0) 
+                ? parseFloat((kmTraveled / prevLog.liters).toFixed(2)) 
+                : null;
+            
             return { ...log, km_per_liter: kmPerLiter };
         });
 
-        // Salva no estado, ordenando do mais recente para o mais antigo para exibição
         setFuelLogs(calculatedFuelLogs.sort((a, b) => b.odometer - a.odometer));
     };
 
@@ -57,11 +57,13 @@ export const AppProvider = ({ children, user }: AppProviderProps) => {
     // As funções de CRUD agora apenas fazem a alteração e chamam fetchData para garantir a consistência
     const addPassenger = async (passengerData: Omit<Passenger, 'id'|'created_at'|'user_id'>) => {
         if (!user) throw new Error("Usuário não logado");
-        await supabase.from('passengers').insert([{ ...passengerData, user_id: user.id }]);
+        const { error } = await supabase.from('passengers').insert([{ ...passengerData, user_id: user.id }]);
+        if (error) { console.error(error); throw error; }
         await fetchData();
     };
     const updatePassenger = async (updatedPassenger: Omit<Passenger, 'created_at'|'user_id'>) => {
-        await supabase.from('passengers').update(updatedPassenger).eq('id', updatedPassenger.id);
+        const { error } = await supabase.from('passengers').update(updatedPassenger).eq('id', updatedPassenger.id);
+        if (error) { console.error(error); throw error; }
         await fetchData();
     };
     const deletePassenger = async (passengerId: string) => {
@@ -92,7 +94,9 @@ export const AppProvider = ({ children, user }: AppProviderProps) => {
     };
     const addFuelLog = async (fuelLogData: Omit<FuelLog, 'id'|'created_at'|'user_id'|'km_per_liter'>) => {
         if (!user) throw new Error("Usuário não logado");
-        await supabase.from('fuel_logs').insert([{ ...fuelLogData, user_id: user.id }]);
+        // O cálculo agora é centralizado no fetchData, então só precisamos inserir os dados brutos.
+        const newLogData = { ...fuelLogData, user_id: user.id };
+        await supabase.from('fuel_logs').insert([newLogData]);
         await fetchData();
     };
     const updateFuelLog = async (updatedFuelLog: Omit<FuelLog, 'created_at'|'user_id'>) => {

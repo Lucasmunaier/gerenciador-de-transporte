@@ -98,6 +98,9 @@ const Login: React.FC<LoginProps> = ({ onNavigateToRegister }) => {
             Crie uma agora
           </button>
         </p>
+        <p className="mt-8 text-center text-xs text-gray-400">
+        By: Munaier
+        </p>
       </div>
     </div>
   );

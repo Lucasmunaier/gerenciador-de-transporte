@@ -196,6 +196,7 @@ const App: React.FC = () => {
         
         <footer className="py-4 text-center text-sm text-gray-500 border-t border-gray-200 bg-white">
           <p>&copy; {new Date().getFullYear()} {APP_TITLE}. Todos os direitos reservados.</p>
+          <p className="mt-1 text-xs text-gray-400">By: Munaier</p> {/* <-- ADICIONE AQUI --> */}
         </footer>
       </div>
     </AppProvider>

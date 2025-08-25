@@ -1,5 +1,3 @@
-// ARQUIVO: contexts/AppContext.tsx
-
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 import { AppContextType, Passenger, Trip, FuelLog, TripType } from '../types';
 import { supabase } from '../supabaseClient';
@@ -17,102 +15,93 @@ export const AppProvider = ({ children, user }: AppProviderProps) => {
     const [trips, setTrips] = useState<Trip[]>([]);
     const [fuelLogs, setFuelLogs] = useState<FuelLog[]>([]);
 
-    // --- Funções para buscar dados (agora separadas) ---
-    const getPassengers = async () => {
-        const { data, error } = await supabase.from('passengers').select('*');
-        if (error) console.error('Erro ao buscar passageiros:', error);
-        else setPassengers(data || []);
-    };
-    const getTrips = async () => {
-        const { data, error } = await supabase.from('trips').select('*');
-        if (error) console.error('Erro ao buscar viagens:', error);
-        else setTrips(data || []);
-    };
-    const getFuelLogs = async () => {
-        const { data, error } = await supabase.from('fuel_logs').select('*').order('odometer', { ascending: false });
-        if (error) console.error('Erro ao buscar abastecimentos:', error);
-        else setFuelLogs(data || []);
+    // Função central que busca os dados e recalcula o consumo
+    const fetchData = async () => {
+        if (!user) return;
+        
+        // Busca de dados brutos
+        const { data: pData, error: pError } = await supabase.from('passengers').select('*');
+        if (pError) console.error('Erro ao buscar passageiros:', pError);
+        else setPassengers(pData || []);
+        
+        const { data: tData, error: tError } = await supabase.from('trips').select('*');
+        if (tError) console.error('Erro ao buscar viagens:', tError);
+        else setTrips(tData || []);
+
+        const { data: rawFuelLogs, error: fError } = await supabase.from('fuel_logs').select('*').order('odometer', { ascending: true });
+        if (fError) {
+            console.error('Erro ao buscar abastecimentos:', fError);
+            setFuelLogs([]);
+            return;
+        }
+
+        // Lógica de Recálculo de Consumo
+        const calculatedFuelLogs = (rawFuelLogs || []).map((log, index, allLogs) => {
+            if (index === 0) {
+                return { ...log, km_per_liter: null }; // O primeiro registro não tem como calcular
+            }
+            const prevLog = allLogs[index - 1];
+            const kmTraveled = log.odometer - prevLog.odometer;
+            const kmPerLiter = (kmTraveled > 0 && log.liters > 0) ? parseFloat((kmTraveled / log.liters).toFixed(2)) : null;
+            return { ...log, km_per_liter: kmPerLiter };
+        });
+
+        // Salva no estado, ordenando do mais recente para o mais antigo para exibição
+        setFuelLogs(calculatedFuelLogs.sort((a, b) => b.odometer - a.odometer));
     };
 
     useEffect(() => {
-        if (user) {
-            getPassengers();
-            getTrips();
-            getFuelLogs();
-        }
+        fetchData();
     }, [user]);
 
-    // --- PASSAGEIROS ---
-    const addPassenger = async (passengerData: Omit<Passenger, 'id' | 'created_at' | 'user_id'>) => {
+    // As funções de CRUD agora apenas fazem a alteração e chamam fetchData para garantir a consistência
+    const addPassenger = async (passengerData: Omit<Passenger, 'id'|'created_at'|'user_id'>) => {
         if (!user) throw new Error("Usuário não logado");
-        const { error } = await supabase.from('passengers').insert([{ ...passengerData, user_id: user.id }]);
-        if (error) { console.error(error); throw error; }
-        await getPassengers(); // Re-busca a lista completa
+        await supabase.from('passengers').insert([{ ...passengerData, user_id: user.id }]);
+        await fetchData();
     };
-    const updatePassenger = async (updatedPassenger: Passenger) => {
-        const { error } = await supabase.from('passengers').update(updatedPassenger).eq('id', updatedPassenger.id);
-        if (error) { console.error(error); throw error; }
-        await getPassengers(); // Re-busca a lista completa
+    const updatePassenger = async (updatedPassenger: Omit<Passenger, 'created_at'|'user_id'>) => {
+        await supabase.from('passengers').update(updatedPassenger).eq('id', updatedPassenger.id);
+        await fetchData();
     };
-    const deletePassenger = async (passenger_id: string) => {
-        const { error } = await supabase.from('passengers').delete().eq('id', passenger_id);
-        if (error) { console.error(error); throw error; }
-        await getPassengers(); // Re-busca a lista completa
+    const deletePassenger = async (passengerId: string) => {
+        await supabase.from('trips').delete().eq('passenger_id', passengerId);
+        await supabase.from('passengers').delete().eq('id', passengerId);
+        await fetchData();
     };
-
-    // --- VIAGENS ---
-    const addTrip = async (tripData: Omit<Trip, 'id' | 'created_at' | 'user_id' | 'paid' | 'tripValue'>) => {
+    const addTrip = async (tripData: Omit<Trip, 'id'|'created_at'|'user_id'|'paid'|'tripValue'>) => {
         if (!user) throw new Error("Usuário não logado");
         const passenger = passengers.find(p => p.id === tripData.passenger_id);
         if (!passenger) throw new Error("Passageiro não encontrado");
-
         const calculatedTripValue = tripData.type === TripType.AMBOS ? passenger.valuePerTrip * 2 : passenger.valuePerTrip;
         const newTripData = { ...tripData, paid: false, tripValue: calculatedTripValue, user_id: user.id };
-
-        const { error } = await supabase.from('trips').insert([newTripData]);
-        if (error) { console.error(error); throw error; }
-        await getTrips(); // Re-busca a lista completa
+        await supabase.from('trips').insert([newTripData]);
+        await fetchData();
     };
     const updateTrip = async (updatedTrip: Trip) => {
-        const { error } = await supabase.from('trips').update(updatedTrip).eq('id', updatedTrip.id);
-        if (error) { console.error(error); throw error; }
-        await getTrips(); // Re-busca a lista completa
+        await supabase.from('trips').update(updatedTrip).eq('id', updatedTrip.id);
+        await fetchData();
     };
     const deleteTrip = async (tripId: string) => {
-        const { error } = await supabase.from('trips').delete().eq('id', tripId);
-        if (error) { console.error(error); throw error; }
-        await getTrips(); // Re-busca a lista completa
+        await supabase.from('trips').delete().eq('id', tripId);
+        await fetchData();
     };
     const markTripsAsPaid = async (tripIds: string[]) => {
-        const { error } = await supabase.from('trips').update({ paid: true }).in('id', tripIds);
-        if (error) { console.error(error); throw error; }
-        await getTrips(); // Re-busca a lista completa
+        await supabase.from('trips').update({ paid: true }).in('id', tripIds);
+        await fetchData();
     };
-
-    // --- ABASTECIMENTOS ---
-    const addFuelLog = async (fuelLogData: Omit<FuelLog, 'id' | 'created_at' | 'user_id' | 'kmPerLiter'>) => {
+    const addFuelLog = async (fuelLogData: Omit<FuelLog, 'id'|'created_at'|'user_id'|'km_per_liter'>) => {
         if (!user) throw new Error("Usuário não logado");
-        const { data: lastLog } = await supabase.from('fuel_logs').select('odometer').order('odometer', { ascending: false }).limit(1).single();
-        let kmPerLiter: number | null = null;
-        if (lastLog && lastLog.odometer < fuelLogData.odometer) {
-            const kmTraveled = fuelLogData.odometer - lastLog.odometer;
-            kmPerLiter = kmTraveled > 0 && fuelLogData.liters > 0 ? kmTraveled / fuelLogData.liters : null;
-        }
-
-        const newLogData = { ...fuelLogData, user_id: user.id, km_per_liter: kmPerLiter };
-        const { error } = await supabase.from('fuel_logs').insert([newLogData]);
-        if (error) { console.error(error); throw error; }
-        await getFuelLogs(); // Re-busca a lista completa
+        await supabase.from('fuel_logs').insert([{ ...fuelLogData, user_id: user.id }]);
+        await fetchData();
     };
-    const updateFuelLog = async (updatedFuelLog: FuelLog) => {
-        const { error } = await supabase.from('fuel_logs').update(updatedFuelLog).eq('id', updatedFuelLog.id);
-        if (error) { console.error(error); throw error; }
-        await getFuelLogs(); // Re-busca a lista completa
+    const updateFuelLog = async (updatedFuelLog: Omit<FuelLog, 'created_at'|'user_id'>) => {
+        await supabase.from('fuel_logs').update(updatedFuelLog).eq('id', updatedFuelLog.id);
+        await fetchData();
     };
     const deleteFuelLog = async (fuelLogId: string) => {
-        const { error } = await supabase.from('fuel_logs').delete().eq('id', fuelLogId);
-        if (error) { console.error(error); throw error; }
-        await getFuelLogs(); // Re-busca a lista completa
+        await supabase.from('fuel_logs').delete().eq('id', fuelLogId);
+        await fetchData();
     };
 
     const contextValue = { passengers, trips, fuelLogs, addPassenger, updatePassenger, deletePassenger, addTrip, updateTrip, deleteTrip, markTripsAsPaid, addFuelLog, updateFuelLog, deleteFuelLog };

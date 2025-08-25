@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
-import { AppContextType, Passenger, Trip, FuelLog, TripType } from '../types';
+import { AppContextType, Passenger, Trip, FuelLog, TripType, Profile } from '../types';
 import { supabase } from '../supabaseClient';
 import { User } from '@supabase/supabase-js';
 
@@ -14,44 +14,30 @@ export const AppProvider = ({ children, user }: AppProviderProps) => {
     const [passengers, setPassengers] = useState<Passenger[]>([]);
     const [trips, setTrips] = useState<Trip[]>([]);
     const [fuelLogs, setFuelLogs] = useState<FuelLog[]>([]);
+    const [profile, setProfile] = useState<Profile | null>(null);
 
     const fetchData = async () => {
         if (!user) return;
         
-        const { data: pData, error: pError } = await supabase.from('passengers').select('*');
-        if (pError) console.error('Erro ao buscar passageiros:', pError); else setPassengers(pData || []);
+        const { data: profileData } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+        setProfile(profileData || null);
+
+        const { data: pData } = await supabase.from('passengers').select('*');
+        setPassengers(pData || []);
         
-        const { data: tData, error: tError } = await supabase.from('trips').select('*');
-        if (tError) console.error('Erro ao buscar viagens:', tError); else setTrips(tData || []);
+        const { data: tData } = await supabase.from('trips').select('*');
+        setTrips(tData || []);
 
-        // Busca os abastecimentos ordenados pelo odômetro ASCENDENTE para facilitar o cálculo
-        const { data: rawFuelLogs, error: fError } = await supabase.from('fuel_logs').select('*').order('odometer', { ascending: true });
-        if (fError) {
-            console.error('Erro ao buscar abastecimentos:', fError);
-            setFuelLogs([]);
-            return;
-        }
-
-        // Lógica de Recálculo de Consumo CORRIGIDA
+        const { data: rawFuelLogs } = await supabase.from('fuel_logs').select('*').order('odometer', { ascending: true });
+        
         const calculatedFuelLogs = (rawFuelLogs || []).map((log, index, allLogs) => {
-            if (index === 0) {
-                return { ...log, km_per_liter: null }; // O primeiro registro não tem como calcular
-            }
-            
+            if (index === 0) return { ...log, km_per_liter: null };
             const prevLog = allLogs[index - 1];
             const kmTraveled = log.odometer - prevLog.odometer;
-            
-            // ==================================================================
-            // A CORREÇÃO ESTÁ AQUI: Usando prevLog.liters em vez de log.liters
-            // ==================================================================
-            const kmPerLiter = (kmTraveled > 0 && prevLog.liters > 0) 
-                ? parseFloat((kmTraveled / prevLog.liters).toFixed(2)) 
-                : null;
-            
+            const kmPerLiter = (kmTraveled > 0 && prevLog.liters > 0) ? parseFloat((kmTraveled / prevLog.liters).toFixed(2)) : null;
             return { ...log, km_per_liter: kmPerLiter };
         });
 
-        // Salva no estado, ordenando do mais recente para o mais antigo para exibição na tela
         setFuelLogs(calculatedFuelLogs.sort((a, b) => b.odometer - a.odometer));
     };
 
@@ -61,8 +47,13 @@ export const AppProvider = ({ children, user }: AppProviderProps) => {
         }
     }, [user]);
 
-    // O resto das funções (add, update, delete) permanece o mesmo.
-    // Elas chamam fetchData(), que agora contém a lógica de cálculo correta.
+    const updateProfile = async (updatedProfile: Omit<Profile, 'id'|'updated_at'>) => {
+        if (!user) throw new Error("Usuário não logado");
+        const { error } = await supabase.from('profiles').update(updatedProfile).eq('id', user.id);
+        if (error) { console.error(error); throw error; }
+        await fetchData();
+    };
+
     const addPassenger = async (passengerData: Omit<Passenger, 'id'|'created_at'|'user_id'>) => {
         if (!user) throw new Error("Usuário não logado");
         await supabase.from('passengers').insert([{ ...passengerData, user_id: user.id }]);
@@ -113,7 +104,7 @@ export const AppProvider = ({ children, user }: AppProviderProps) => {
         await fetchData();
     };
 
-    const contextValue = { passengers, trips, fuelLogs, addPassenger, updatePassenger, deletePassenger, addTrip, updateTrip, deleteTrip, markTripsAsPaid, addFuelLog, updateFuelLog, deleteFuelLog };
+    const contextValue = { profile, updateProfile, passengers, trips, fuelLogs, addPassenger, updatePassenger, deletePassenger, addTrip, updateTrip, deleteTrip, markTripsAsPaid, addFuelLog, updateFuelLog, deleteFuelLog };
 
     return <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>;
 };

@@ -29,7 +29,18 @@ export interface FuelLog {
   cost: number;
   km_per_liter?: number | null;
 }
+// NOVO: Interface para o perfil do usuário
+export interface Profile {
+  id: string;
+  updated_at?: string;
+  username: string;
+  full_name: string;
+  phone?: string | null;
+  address?: string | null;
+}
 export interface AppContextType {
+  profile: Profile | null; // Adicionado
+  updateProfile: (profile: Omit<Profile, 'id'|'updated_at'>) => Promise<void>; // Adicionado
   passengers: Passenger[];
   trips: Trip[];
   fuelLogs: FuelLog[];

@@ -21,7 +21,10 @@ const Login: React.FC<LoginProps> = ({ onNavigateToRegister, onNavigateToForgotP
     if (error) {
       if (error.message === 'Invalid login credentials') {
         setError('Email ou senha inválidos.');
-      } else {
+      } else if (error.message === 'Email not confirmed') {
+        setError('Por favor, confirme seu email antes de fazer o login.');
+      }
+      else {
         setError(`Erro ao fazer login: ${error.message}`);
       }
     }

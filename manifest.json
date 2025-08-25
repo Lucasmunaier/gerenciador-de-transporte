@@ -1,0 +1,27 @@
+{
+  "name": "Gerenciador de Transporte",
+  "short_name": "Transporte",
+  "description": "Aplicativo para gerenciar passageiros, viagens, abastecimentos, cobranças e relatórios de transporte.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f1f5f9",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    },
+    {
+      "src": "/maskable-icon.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "maskable"
+    }
+  ]
+}

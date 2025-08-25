@@ -1,0 +1,5 @@
+{
+  "name": "Gerenciador de Transporte",
+  "description": "Aplicativo para gerenciar passageiros, viagens, abastecimentos, cobranças e relatórios de transporte.",
+  "requestFramePermissions": []
+}

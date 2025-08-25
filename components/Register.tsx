@@ -1,0 +1,94 @@
+// ARQUIVO: components/Register.tsx
+
+import React, { useState } from 'react';
+import { supabase } from '../supabaseClient'; // Verifique se o caminho está correto
+
+interface RegisterProps {
+  onNavigateToLogin: () => void;
+}
+
+const Register: React.FC<RegisterProps> = ({ onNavigateToLogin }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setSuccessMessage(null);
+
+    const { error } = await supabase.auth.signUp({
+      email: email,
+      password: password,
+    });
+
+    if (error) {
+      setError(`Erro ao criar conta: ${error.message}`);
+    } else {
+      setSuccessMessage("Conta criada com sucesso! Você já pode fazer o login.");
+      setEmail('');
+      setPassword('');
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-200 to-sky-200 p-4">
+      <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+        <h2 className="text-2xl font-bold text-blue-700 mb-6 text-center">Criar Nova Conta</h2>
+        {error && <p className="text-red-500 mb-4 bg-red-100 p-3 rounded-md text-center">{error}</p>}
+        {successMessage && <p className="text-green-500 mb-4 bg-green-100 p-3 rounded-md text-center">{successMessage}</p>}
+        <form onSubmit={handleRegister}>
+          <div className="mb-4">
+            <label htmlFor="email" className="block text-gray-700 text-sm font-bold mb-2">
+              Email:
+            </label>
+            <input
+              type="email"
+              id="email"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="seu@email.com"
+              required
+            />
+          </div>
+          <div className="mb-6">
+            <label htmlFor="password" className="block text-gray-700 text-sm font-bold mb-2">
+              Senha:
+            </label>
+            <input
+              type="password"
+              id="password"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Crie uma senha (mínimo 6 caracteres)"
+              required
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <button
+              className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded focus:outline-none focus:shadow-outline ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              type="submit"
+              disabled={loading}
+            >
+              {loading ? 'Criando conta...' : 'Criar Conta'}
+            </button>
+          </div>
+        </form>
+        <p className="mt-4 text-gray-600 text-center text-xs">
+          Já tem uma conta?{' '}
+          <button onClick={onNavigateToLogin} className="text-blue-500 hover:text-blue-700 font-bold">
+            Faça o login
+          </button>
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default Register;

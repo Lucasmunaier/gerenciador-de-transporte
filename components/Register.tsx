@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from '../supabaseClient';
-import { ArrowLeftIcon } from './icons'; // Importando o ícone de seta
+import { ArrowLeftIcon } from './icons';
 
 interface RegisterProps {
   onNavigateToLogin: () => void;
@@ -9,7 +9,7 @@ interface RegisterProps {
 const Register: React.FC<RegisterProps> = ({ onNavigateToLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState(''); // NOVO: Estado para a confirmação de senha
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -19,7 +19,6 @@ const Register: React.FC<RegisterProps> = ({ onNavigateToLogin }) => {
     setError(null);
     setSuccessMessage(null);
 
-    // NOVO: Validações no frontend
     if (password.length < 6) {
       setError("A senha deve ter no mínimo 6 caracteres.");
       return;
@@ -39,7 +38,6 @@ const Register: React.FC<RegisterProps> = ({ onNavigateToLogin }) => {
     if (error) {
       setError(`Erro ao criar conta: ${error.message}`);
     } else {
-      // ALTERADO: Mensagem para confirmar o email
       setSuccessMessage("Conta criada! Por favor, verifique seu email para confirmar sua conta antes de fazer o login.");
       setEmail('');
       setPassword('');
@@ -51,8 +49,6 @@ const Register: React.FC<RegisterProps> = ({ onNavigateToLogin }) => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-200 to-sky-200 p-4">
       <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
-        
-        {/* NOVO: Título com botão de voltar */}
         <div className="relative flex items-center justify-center mb-6">
           <button 
             onClick={onNavigateToLogin} 
@@ -70,49 +66,18 @@ const Register: React.FC<RegisterProps> = ({ onNavigateToLogin }) => {
         <form onSubmit={handleRegister} className={successMessage ? 'hidden' : ''}>
           <div className="mb-4">
             <label htmlFor="email" className="block text-gray-700 text-sm font-bold mb-2">Email:</label>
-            <input
-              type="email"
-              id="email"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="seu@email.com"
-              required
-            />
+            <input type="email" id="email" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" required />
           </div>
           <div className="mb-4">
             <label htmlFor="password" className="block text-gray-700 text-sm font-bold mb-2">Senha:</label>
-            <input
-              type="password"
-              id="password"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Crie uma senha (mínimo 6 caracteres)"
-              required
-            />
+            <input type="password" id="password" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Crie uma senha (mínimo 6 caracteres)" required />
           </div>
-          
-          {/* NOVO: Campo de Confirmar Senha */}
           <div className="mb-6">
             <label htmlFor="confirmPassword" className="block text-gray-700 text-sm font-bold mb-2">Confirmar Senha:</label>
-            <input
-              type="password"
-              id="confirmPassword"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Repita a senha"
-              required
-            />
+            <input type="password" id="confirmPassword" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Repita a senha" required />
           </div>
-
           <div className="flex items-center justify-between">
-            <button
-              className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded focus:outline-none focus:shadow-outline ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-              type="submit"
-              disabled={loading}
-            >
+            <button className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded focus:outline-none focus:shadow-outline ${loading ? 'opacity-50 cursor-not-allowed' : ''}`} type="submit" disabled={loading}>
               {loading ? 'Criando conta...' : 'Criar Conta'}
             </button>
           </div>
@@ -124,14 +89,9 @@ const Register: React.FC<RegisterProps> = ({ onNavigateToLogin }) => {
             Faça o login
           </button>
         </p>
-        
-        {/* NOVO: Marca d'água */}
-        <p className="mt-8 text-center text-xs text-gray-400">
-          By: Munaier
-        </p>
+        <p className="mt-8 text-center text-xs text-gray-400">By: Munaier</p>
       </div>
     </div>
   );
 };
-
 export default Register;

@@ -1,5 +1,3 @@
-// ARQUIVO: App.tsx (Versão Final e Completa)
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
 import { User } from '@supabase/supabase-js';
@@ -9,26 +7,22 @@ import TripsTab from './components/tabs/TripsTab';
 import FuelLogTab from './components/tabs/FuelLogTab';
 import BillingTab from './components/tabs/BillingTab';
 import ReportsTab from './components/tabs/ReportsTab';
+import ProfileTab from './components/tabs/ProfileTab';
 import Login from './components/Login';
 import Register from './components/Register';
+import ForgotPassword from './components/ForgotPassword';
 import { Tab } from './types';
 import { APP_TITLE, TAB_NAMES } from './constants';
 import { 
-  UserPlusIcon, 
-  CalendarDaysIcon, 
-  BeakerIcon, 
-  CreditCardIcon, 
-  ChartBarIcon,
-  ChevronDoubleLeftIcon,
-  ChevronDoubleRightIcon,
-  ArrowLeftOnRectangleIcon,
-  Bars3Icon
+  UserPlusIcon, CalendarDaysIcon, BeakerIcon, CreditCardIcon, ChartBarIcon,
+  ChevronDoubleLeftIcon, ChevronDoubleRightIcon, ArrowLeftOnRectangleIcon,
+  Bars3Icon, UserCircleIcon
 } from './components/icons';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState<'login' | 'register'>('login');
+  const [view, setView] = useState<'login' | 'register' | 'forgotPassword'>('login');
   const [activeTab, setActiveTab] = useState<Tab>(Tab.PASSENGERS);
   const [isSidebarMinimized, setIsSidebarMinimized] = useState(false);
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -40,39 +34,26 @@ const App: React.FC = () => {
       setLoading(false);
     };
     getSession();
-
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       setLoading(false);
     });
-
-    return () => {
-      authListener?.subscription.unsubscribe();
-    };
+    return () => { authListener?.subscription.unsubscribe(); };
   }, []);
 
   const handleLogout = async () => {
-    if (window.confirm("Tem certeza que deseja sair?")) {
-      await supabase.auth.signOut();
-    }
+    if (window.confirm("Tem certeza que deseja sair?")) { await supabase.auth.signOut(); }
   };
-
-  // --- FUNÇÕES E COMPONENTES AUXILIARES QUE ESTAVAM FALTANDO ---
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case Tab.PASSENGERS:
-        return <PassengersTab />;
-      case Tab.TRIPS:
-        return <TripsTab />;
-      case Tab.FUEL_LOGS:
-        return <FuelLogTab />;
-      case Tab.BILLING:
-        return <BillingTab />;
-      case Tab.REPORTS:
-        return <ReportsTab />;
-      default:
-        return null;
+      case Tab.PASSENGERS: return <PassengersTab />;
+      case Tab.TRIPS: return <TripsTab />;
+      case Tab.FUEL_LOGS: return <FuelLogTab />;
+      case Tab.BILLING: return <BillingTab />;
+      case Tab.REPORTS: return <ReportsTab />;
+      case Tab.PROFILE: return <ProfileTab />;
+      default: return null;
     }
   };
 
@@ -110,6 +91,7 @@ const App: React.FC = () => {
         <TabButton tab={Tab.FUEL_LOGS} icon={<BeakerIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.FUEL_LOGS]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
         <TabButton tab={Tab.BILLING} icon={<CreditCardIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.BILLING]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
         <TabButton tab={Tab.REPORTS} icon={<ChartBarIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.REPORTS]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
+        <TabButton tab={Tab.PROFILE} icon={<UserCircleIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.PROFILE]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
       </div>
       <button
           onClick={handleLogout}
@@ -128,26 +110,22 @@ const App: React.FC = () => {
           title={isSidebarMinimized ? "Expandir Menu" : "Minimizar Menu"}
         >
           {isSidebarMinimized ? <ChevronDoubleRightIcon className="w-5 h-5 flex-shrink-0" /> : <ChevronDoubleLeftIcon className="w-5 h-5 flex-shrink-0" />}
-          {!isSidebarMinimized && <span className="truncate">Minimizar</span>}
+          {!isMinimized && <span className="truncate">Minimizar</span>}
         </button>
       </div>
     </>
   );
 
-  // --- LÓGICA DE RENDERIZAÇÃO ---
-
-  if (loading) {
-    return <div className="flex items-center justify-center min-h-screen">Carregando...</div>;
-  }
-
+  if (loading) { return <div className="flex items-center justify-center min-h-screen">Carregando...</div>; }
+  
   if (!user) {
-    if (view === 'login') {
-      return <Login onNavigateToRegister={() => setView('register')} />;
+    switch (view) {
+      case 'register': return <Register onNavigateToLogin={() => setView('login')} />;
+      case 'forgotPassword': return <ForgotPassword onNavigateToLogin={() => setView('login')} />;
+      default: return <Login onNavigateToRegister={() => setView('register')} onNavigateToForgotPassword={() => setView('forgotPassword')} />;
     }
-    return <Register onNavigateToLogin={() => setView('login')} />;
   }
 
-  // CORREÇÃO FINAL: O conteúdo visual do app agora está DENTRO do AppProvider
   return (
     <AppProvider user={user}>
       <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-100 to-sky-100 text-gray-800">
@@ -196,11 +174,10 @@ const App: React.FC = () => {
         
         <footer className="py-4 text-center text-sm text-gray-500 border-t border-gray-200 bg-white">
           <p>&copy; {new Date().getFullYear()} {APP_TITLE}. Todos os direitos reservados.</p>
-          <p className="mt-1 text-xs text-gray-400">By: Munaier</p> {/* <-- ADICIONE AQUI --> */}
+          <p className="mt-1 text-xs text-gray-400">By: Munaier</p>
         </footer>
       </div>
     </AppProvider>
   );
 };
-
 export default App;

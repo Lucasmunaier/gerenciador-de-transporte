@@ -44,7 +44,7 @@ const PassengersTab: React.FC = () => {
         <h2 className="text-2xl md:text-3xl font-semibold text-gray-800">Gerenciar Passageiros</h2>
         <button
           onClick={handleAddNew}
-          className="flex items-center justify-center sm:justify-start bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150 ease-in-out"
+          className="w-full sm:w-auto flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150 ease-in-out"
         >
           <UserPlusIcon className="w-5 h-5 mr-2" />
           <span className="truncate">Novo Passageiro</span>
@@ -69,8 +69,7 @@ const PassengersTab: React.FC = () => {
                       Valor por Viagem: <span className="font-medium text-green-600">R$ {passenger.valuePerTrip.toFixed(2)}</span>
                     </p>
                   </div>
-                  {/* Botões ficam na lateral em telas grandes, e embaixo em telas pequenas */}
-                  <div className="flex space-x-3 ml-0 mt-4 sm:mt-0 sm:ml-4">
+                  <div className="flex space-x-3 self-start sm:self-center mt-4 sm:mt-0 sm:ml-4">
                     <button
                       onClick={() => handleEdit(passenger)}
                       className="p-2 text-yellow-500 hover:text-yellow-700 hover:bg-yellow-100 rounded-full transition duration-150"

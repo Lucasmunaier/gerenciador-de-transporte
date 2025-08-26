@@ -19,7 +19,6 @@ import {
   Bars3Icon, UserCircleIcon
 } from './components/icons';
 
-// Sub-componente para o aplicativo principal, para poder acessar o contexto
 const MainApp: React.FC<{ user: User }> = ({ user }) => {
   const { profile } = useAppContext();
   const [activeTab, setActiveTab] = useState<Tab>(Tab.PASSENGERS);
@@ -73,12 +72,18 @@ const MainApp: React.FC<{ user: User }> = ({ user }) => {
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-100 to-sky-100 text-gray-800">
       <header className="bg-white shadow-lg sticky top-0 z-30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
-          <div className="flex items-center">
-            <button onClick={() => setMobileSidebarOpen(true)} className="lg:hidden mr-4 p-2 text-gray-600 hover:text-blue-700"><Bars3Icon className="w-6 h-6"/></button>
-            <h1 className="text-2xl sm:text-3xl font-bold text-blue-700 tracking-tight">{APP_TITLE}</h1>
+          <div className="flex-1 flex justify-start">
+            <button onClick={() => setMobileSidebarOpen(true)} className="lg:hidden p-2 -ml-2 text-gray-600 hover:text-blue-700">
+              <Bars3Icon className="w-6 h-6"/>
+            </button>
           </div>
-          <div className="text-sm text-gray-600 hidden sm:block">
-            Usuário: <span className="font-semibold">{profile?.username || profile?.full_name || user.email}</span>
+          <div className="flex-1 text-center">
+            <h1 className="text-xl sm:text-2xl font-bold text-blue-700 tracking-tight whitespace-nowrap">{APP_TITLE}</h1>
+          </div>
+          <div className="flex-1 flex justify-end">
+            <div className="hidden sm:block text-sm text-gray-600 text-right">
+              Usuário: <span className="font-semibold">{profile?.username || profile?.full_name || user.email}</span>
+            </div>
           </div>
         </div>
       </header>

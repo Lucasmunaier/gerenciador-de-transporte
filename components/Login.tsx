@@ -32,13 +32,18 @@ const Login: React.FC<LoginProps> = ({ onNavigateToRegister, onNavigateToForgotP
   };
 
   const handleGoogleLogin = async () => {
-    await supabase.auth.signInWithOAuth({ provider: 'google' });
+    await supabase.auth.signInWithOAuth({ 
+        provider: 'google',
+        options: {
+            redirectTo: window.location.origin
+        }
+    });
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-200 to-sky-200 p-4">
       <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
-        <h2 className="text-2xl font-bold text-blue-700 mb-6 text-center">GERENCIAMENTO DE CARONA</h2>
+        <h2 className="text-2xl font-bold text-blue-700 mb-6 text-center">Acesso ao Sistema</h2>
         {error && <p className="text-red-500 mb-4 bg-red-100 p-3 rounded-md text-center">{error}</p>}
         <form onSubmit={handleLogin}>
           <div className="mb-4">

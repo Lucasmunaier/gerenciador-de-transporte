@@ -41,8 +41,8 @@ const Register: React.FC<RegisterProps> = ({ onNavigateToLogin }) => {
       password: password,
       options: {
         data: {
-          full_name: fullName,
-          username: username.toLowerCase(), // Salva em minúsculas para evitar duplicidade
+          full_name: fullName.trim(),
+          username: username.trim().toLowerCase(),
         }
       }
     });
@@ -77,28 +77,28 @@ const Register: React.FC<RegisterProps> = ({ onNavigateToLogin }) => {
         {error && <p className="text-red-500 mb-4 bg-red-100 p-3 rounded-md text-center">{error}</p>}
         {successMessage && <p className="text-green-500 mb-4 bg-green-100 p-3 rounded-md text-center">{successMessage}</p>}
         
-        <form onSubmit={handleRegister} className={successMessage ? 'hidden' : ''}>
-          <div className="mb-4">
+        <form onSubmit={handleRegister} className={`space-y-4 ${successMessage ? 'hidden' : ''}`}>
+          <div>
             <label htmlFor="fullName" className="block text-gray-700 text-sm font-bold mb-2">Nome Completo:</label>
             <input type="text" id="fullName" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Ex: João da Silva" required />
           </div>
-          <div className="mb-4">
+          <div>
             <label htmlFor="username" className="block text-gray-700 text-sm font-bold mb-2">Nome de Usuário:</label>
             <input type="text" id="username" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Ex: joaosilva (será seu login)" required />
           </div>
-          <div className="mb-4">
+          <div>
             <label htmlFor="email" className="block text-gray-700 text-sm font-bold mb-2">Email:</label>
             <input type="email" id="email" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" required />
           </div>
-          <div className="mb-4">
+          <div>
             <label htmlFor="password" className="block text-gray-700 text-sm font-bold mb-2">Senha:</label>
             <input type="password" id="password" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mínimo 6 caracteres" required />
           </div>
-          <div className="mb-6">
+          <div className="mb-2">
             <label htmlFor="confirmPassword" className="block text-gray-700 text-sm font-bold mb-2">Confirmar Senha:</label>
             <input type="password" id="confirmPassword" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Repita a senha" required />
           </div>
-          <div className="flex items-center justify-between">
+          <div className="pt-2">
             <button className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded focus:outline-none focus:shadow-outline ${loading ? 'opacity-50 cursor-not-allowed' : ''}`} type="submit" disabled={loading}>
               {loading ? 'Criando conta...' : 'Criar Conta'}
             </button>

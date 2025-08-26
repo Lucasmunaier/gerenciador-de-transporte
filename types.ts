@@ -39,8 +39,8 @@ export interface Profile {
   address?: string | null;
 }
 export interface AppContextType {
-  profile: Profile | null; // Adicionado
-  updateProfile: (profile: Omit<Profile, 'id'|'updated_at'>) => Promise<void>; // Adicionado
+  profile: Profile | null;
+  updateProfile: (profile: Omit<Profile, 'id'|'updated_at'>) => Promise<void>;
   passengers: Passenger[];
   trips: Trip[];
   fuelLogs: FuelLog[];

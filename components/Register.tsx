@@ -10,6 +10,8 @@ const Register: React.FC<RegisterProps> = ({ onNavigateToLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -27,12 +29,22 @@ const Register: React.FC<RegisterProps> = ({ onNavigateToLogin }) => {
       setError("As senhas não coincidem.");
       return;
     }
+    if (!username.trim() || !fullName.trim()) {
+        setError("Nome completo e nome de usuário são obrigatórios.");
+        return;
+    }
 
     setLoading(true);
 
     const { error } = await supabase.auth.signUp({
       email: email,
       password: password,
+      options: {
+        data: {
+          full_name: fullName,
+          username: username.toLowerCase(), // Salva em minúsculas para evitar duplicidade
+        }
+      }
     });
 
     if (error) {
@@ -42,6 +54,8 @@ const Register: React.FC<RegisterProps> = ({ onNavigateToLogin }) => {
       setEmail('');
       setPassword('');
       setConfirmPassword('');
+      setFullName('');
+      setUsername('');
     }
     setLoading(false);
   };
@@ -65,12 +79,20 @@ const Register: React.FC<RegisterProps> = ({ onNavigateToLogin }) => {
         
         <form onSubmit={handleRegister} className={successMessage ? 'hidden' : ''}>
           <div className="mb-4">
+            <label htmlFor="fullName" className="block text-gray-700 text-sm font-bold mb-2">Nome Completo:</label>
+            <input type="text" id="fullName" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Ex: João da Silva" required />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="username" className="block text-gray-700 text-sm font-bold mb-2">Nome de Usuário:</label>
+            <input type="text" id="username" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Ex: joaosilva (será seu login)" required />
+          </div>
+          <div className="mb-4">
             <label htmlFor="email" className="block text-gray-700 text-sm font-bold mb-2">Email:</label>
             <input type="email" id="email" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" required />
           </div>
           <div className="mb-4">
             <label htmlFor="password" className="block text-gray-700 text-sm font-bold mb-2">Senha:</label>
-            <input type="password" id="password" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Crie uma senha (mínimo 6 caracteres)" required />
+            <input type="password" id="password" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mínimo 6 caracteres" required />
           </div>
           <div className="mb-6">
             <label htmlFor="confirmPassword" className="block text-gray-700 text-sm font-bold mb-2">Confirmar Senha:</label>

@@ -19,6 +19,7 @@ import {
   Bars3Icon, UserCircleIcon
 } from './components/icons';
 
+// Sub-componente para o aplicativo principal, para poder acessar o contexto
 const MainApp: React.FC<{ user: User }> = ({ user }) => {
   const { profile } = useAppContext();
   const [activeTab, setActiveTab] = useState<Tab>(Tab.PASSENGERS);
@@ -77,7 +78,7 @@ const MainApp: React.FC<{ user: User }> = ({ user }) => {
             <h1 className="text-2xl sm:text-3xl font-bold text-blue-700 tracking-tight">{APP_TITLE}</h1>
           </div>
           <div className="text-sm text-gray-600 hidden sm:block">
-            Usuário: <span className="font-semibold">{profile?.full_name || user.email}</span>
+            Usuário: <span className="font-semibold">{profile?.username || profile?.full_name || user.email}</span>
           </div>
         </div>
       </header>

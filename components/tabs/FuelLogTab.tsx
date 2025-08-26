@@ -70,7 +70,7 @@ const FuelLogTab: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {sortedFuelLogs.map((log) => (
+              {sortedFuelLogs.length > 0 ? sortedFuelLogs.map((log) => (
                 <tr key={log.id} className="hover:bg-gray-50 transition duration-150">
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{new Date(log.date + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">{log.odometer.toLocaleString('pt-BR')} km</td>
@@ -96,7 +96,13 @@ const FuelLogTab: React.FC = () => {
                     </button>
                   </td>
                 </tr>
-              ))}
+              )) : (
+                <tr>
+                  <td colSpan={6} className="text-center py-10 text-gray-500">
+                    Nenhum abastecimento registrado.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

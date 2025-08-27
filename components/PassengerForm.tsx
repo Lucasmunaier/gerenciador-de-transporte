@@ -14,35 +14,49 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ editingPassenger, onDone 
   const { addPassenger, updatePassenger } = useAppContext();
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
-  const [phone, setPhone] = useState(''); // NOVO: Estado para o telefone
+  const [phone, setPhone] = useState('');
   const [valuePerTrip, setValuePerTrip] = useState('');
-  const [errors, setErrors] = useState<{ name?: string; address?: string; phone?: string; valuePerTrip?: string }>({});
+  const [notificationDistance, setNotificationDistance] = useState('');
+  const [latitude, setLatitude] = useState('');
+  const [longitude, setLongitude] = useState('');
+
+  const [errors, setErrors] = useState<{ name?: string; address?: string; phone?: string; valuePerTrip?: string; latitude?: string; longitude?: string; }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (editingPassenger) {
       setName(editingPassenger.name);
       setAddress(editingPassenger.address);
-      setPhone(editingPassenger.phone || ''); // ATUALIZADO
+      setPhone(editingPassenger.phone || '');
       setValuePerTrip(editingPassenger.valuePerTrip.toString());
+      setNotificationDistance(editingPassenger.notification_distance?.toString() || '200');
+      setLatitude(editingPassenger.latitude?.toString() || '');
+      setLongitude(editingPassenger.longitude?.toString() || '');
     } else {
       setName('');
       setAddress('');
-      setPhone(''); // ATUALIZADO
+      setPhone('');
       setValuePerTrip('');
+      setNotificationDistance('200'); // Valor padrão de 200 metros
+      setLatitude('');
+      setLongitude('');
     }
     setErrors({});
   }, [editingPassenger]);
 
   const validate = () => {
-    const newErrors: { name?: string; address?: string; phone?: string; valuePerTrip?: string } = {};
+    const newErrors: { name?: string; address?: string; phone?: string; valuePerTrip?: string; latitude?: string; longitude?: string; } = {};
     if (!name.trim()) newErrors.name = "Nome é obrigatório.";
     if (!address.trim()) newErrors.address = "Endereço é obrigatório.";
-    if (!phone.trim()) newErrors.phone = "Telefone é obrigatório."; // ATUALIZADO
-    if (!valuePerTrip.trim()) {
-      newErrors.valuePerTrip = "Valor por viagem é obrigatório.";
-    } else if (isNaN(parseFloat(valuePerTrip)) || parseFloat(valuePerTrip) <= 0) {
+    if (!phone.trim()) newErrors.phone = "Telefone é obrigatório.";
+    if (!valuePerTrip.trim() || isNaN(parseFloat(valuePerTrip)) || parseFloat(valuePerTrip) <= 0) {
       newErrors.valuePerTrip = "Valor deve ser um número positivo.";
+    }
+    if (latitude.trim() && isNaN(parseFloat(latitude))) {
+        newErrors.latitude = "Latitude deve ser um número válido.";
+    }
+    if (longitude.trim() && isNaN(parseFloat(longitude))) {
+        newErrors.longitude = "Longitude deve ser um número válido.";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -56,8 +70,11 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ editingPassenger, onDone 
     const passengerData = {
       name,
       address,
-      phone, // ATUALIZADO
+      phone,
       valuePerTrip: parseFloat(valuePerTrip),
+      notification_distance: notificationDistance ? parseInt(notificationDistance, 10) : null,
+      latitude: latitude ? parseFloat(latitude) : null,
+      longitude: longitude ? parseFloat(longitude) : null,
     };
     
     try {
@@ -81,74 +98,57 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ editingPassenger, onDone 
         {editingPassenger ? 'Editar Passageiro' : 'Registrar Novo Passageiro'}
       </h3>
       
+      {/* Campos existentes: Nome, Endereço, Telefone, Valor por Viagem */}
       <div>
         <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
-        <input
-          type="text"
-          id="name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className={`w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 ${errors.name ? 'border-red-500' : 'border-gray-300'}`}
-          placeholder="Ex: João da Silva"
-        />
+        <input type="text" id="name" value={name} onChange={(e) => setName(e.target.value)} className={`w-full px-4 py-2 border rounded-md shadow-sm ${errors.name ? 'border-red-500' : 'border-gray-300'}`} required />
         {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
       </div>
-
       <div>
         <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">Endereço</label>
-        <input
-          type="text"
-          id="address"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          className={`w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 ${errors.address ? 'border-red-500' : 'border-gray-300'}`}
-          placeholder="Ex: Rua das Palmeiras, 123"
-        />
-        {errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
+        <input type="text" id="address" value={address} onChange={(e) => setAddress(e.target.value)} className={`w-full px-4 py-2 border rounded-md shadow-sm ${errors.address ? 'border-red-500' : 'border-gray-300'}`} required />
+         {errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
       </div>
-
-      {/* NOVO CAMPO DE TELEFONE */}
       <div>
         <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
-        <input
-          type="text"
-          id="phone"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          className={`w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 ${errors.phone ? 'border-red-500' : 'border-gray-300'}`}
-          placeholder="(99) 99999-9999"
-        />
+        <input type="text" id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} className={`w-full px-4 py-2 border rounded-md shadow-sm ${errors.phone ? 'border-red-500' : 'border-gray-300'}`} required />
         {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
       </div>
-
-      <div>
+       <div>
         <label htmlFor="valuePerTrip" className="block text-sm font-medium text-gray-700 mb-1">Valor por Viagem (R$)</label>
-        <input
-          type="number"
-          id="valuePerTrip"
-          value={valuePerTrip}
-          onChange={(e) => setValuePerTrip(e.target.value)}
-          min="0.01"
-          step="0.01"
-          className={`w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 ${errors.valuePerTrip ? 'border-red-500' : 'border-gray-300'}`}
-          placeholder="Ex: 15.50"
-        />
+        <input type="number" id="valuePerTrip" value={valuePerTrip} onChange={(e) => setValuePerTrip(e.target.value)} min="0.01" step="0.01" className={`w-full px-4 py-2 border rounded-md shadow-sm ${errors.valuePerTrip ? 'border-red-500' : 'border-gray-300'}`} required/>
         {errors.valuePerTrip && <p className="text-red-500 text-xs mt-1">{errors.valuePerTrip}</p>}
       </div>
 
+      <div className="pt-4 border-t">
+        <h4 className="text-lg font-semibold text-gray-700">Configurações de Navegação</h4>
+        <p className="text-xs text-gray-500 mb-4">Esses dados são necessários para a funcionalidade da aba "Navegação".</p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label htmlFor="latitude" className="block text-sm font-medium text-gray-700 mb-1">Latitude</label>
+                <input type="text" id="latitude" value={latitude} onChange={(e) => setLatitude(e.target.value)} className={`w-full px-4 py-2 border rounded-md shadow-sm ${errors.latitude ? 'border-red-500' : 'border-gray-300'}`} placeholder="Ex: -19.912998"/>
+                {errors.latitude && <p className="text-red-500 text-xs mt-1">{errors.latitude}</p>}
+            </div>
+            <div>
+                <label htmlFor="longitude" className="block text-sm font-medium text-gray-700 mb-1">Longitude</label>
+                <input type="text" id="longitude" value={longitude} onChange={(e) => setLongitude(e.target.value)} className={`w-full px-4 py-2 border rounded-md shadow-sm ${errors.longitude ? 'border-red-500' : 'border-gray-300'}`} placeholder="Ex: -43.940933"/>
+                {errors.longitude && <p className="text-red-500 text-xs mt-1">{errors.longitude}</p>}
+            </div>
+        </div>
+        <p className="text-xs text-gray-500 mt-1">Dica: Clique com o botão direito no endereço no Google Maps para obter as coordenadas.</p>
+
+        <div className="mt-4">
+            <label htmlFor="notificationDistance" className="block text-sm font-medium text-gray-700 mb-1">Distância para Notificação (metros)</label>
+            <input type="number" id="notificationDistance" value={notificationDistance} onChange={(e) => setNotificationDistance(e.target.value)} min="50" step="10" className="w-full md:w-1/2 px-4 py-2 border rounded-md shadow-sm border-gray-300"/>
+        </div>
+      </div>
+
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-3 pt-4 gap-3 sm:gap-0">
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="px-6 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-        >
+        <button type="submit" disabled={isSubmitting} className="px-6 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 disabled:opacity-50">
           {isSubmitting ? 'Salvando...' : (editingPassenger ? 'Salvar Alterações' : 'Registrar Passageiro')}
         </button>
-        <button
-          type="button"
-          onClick={onDone}
-          className="px-6 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
-        >
+        <button type="button" onClick={onDone} className="px-6 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
           Cancelar
         </button>
       </div>

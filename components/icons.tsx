@@ -123,3 +123,9 @@ export const GoogleIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
     <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C42.012 35.836 44 30.138 44 24c0-1.341-.138-2.65-.389-3.917z" />
   </svg>
 );
+
+export const MapIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 20.25l6-4.5-6-4.5-6 4.5 6 4.5zm0 0v-8.25M15 15.75l6-4.5-6-4.5-6 4.5 6 4.5zM3 8.25l6 4.5 6-4.5-6-4.5-6 4.5z" />
+  </svg>
+);

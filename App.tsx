@@ -11,13 +11,14 @@ import ProfileTab from './components/tabs/ProfileTab';
 import Login from './components/Login';
 import Register from './components/Register';
 import ForgotPassword from './components/ForgotPassword';
-import CompleteProfile from './components/CompleteProfile'; // <-- 1. IMPORTAR O COMPONENTE
+import CompleteProfile from './components/CompleteProfile';
+import NavigationTab from './components/tabs/NavigationTab';
 import { Tab } from './types';
 import { APP_TITLE, TAB_NAMES } from './constants';
 import { 
   UserPlusIcon, CalendarDaysIcon, BeakerIcon, CreditCardIcon, ChartBarIcon,
   ChevronDoubleLeftIcon, ChevronDoubleRightIcon, ArrowLeftOnRectangleIcon,
-  Bars3Icon, UserCircleIcon
+  Bars3Icon, UserCircleIcon, MapIcon
 } from './components/icons';
 
 // Sub-componente para o aplicativo principal, para poder acessar o contexto
@@ -27,7 +28,6 @@ const MainApp: React.FC<{ user: User }> = ({ user }) => {
   const [isSidebarMinimized, setIsSidebarMinimized] = useState(false);
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-  // <-- 2. LÓGICA PARA VERIFICAR O PERFIL -->
   // Se o perfil existe mas não tem username, mostra a tela para completar
   if (profile && !profile.username) {
     return <CompleteProfile />;
@@ -44,6 +44,7 @@ const MainApp: React.FC<{ user: User }> = ({ user }) => {
       case Tab.FUEL_LOGS: return <FuelLogTab />;
       case Tab.BILLING: return <BillingTab />;
       case Tab.REPORTS: return <ReportsTab />;
+      case Tab.NAVIGATION: return <NavigationTab />;
       case Tab.PROFILE: return <ProfileTab />;
       default: return null;
     }
@@ -63,6 +64,7 @@ const MainApp: React.FC<{ user: User }> = ({ user }) => {
         <TabButton tab={Tab.FUEL_LOGS} icon={<BeakerIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.FUEL_LOGS]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
         <TabButton tab={Tab.BILLING} icon={<CreditCardIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.BILLING]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
         <TabButton tab={Tab.REPORTS} icon={<ChartBarIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.REPORTS]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
+        <TabButton tab={Tab.NAVIGATION} icon={<MapIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.NAVIGATION]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
         <TabButton tab={Tab.PROFILE} icon={<UserCircleIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.PROFILE]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
       </div>
       <button onClick={handleLogout} className={`w-full flex items-center py-2.5 text-sm font-medium rounded-md text-slate-300 hover:bg-slate-700 hover:text-slate-100 transition-colors duration-150 ${isMinimized ? 'justify-center px-2' : 'justify-start space-x-3 px-3'}`} title="Sair">
@@ -80,17 +82,14 @@ const MainApp: React.FC<{ user: User }> = ({ user }) => {
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-100 to-sky-100 text-gray-800">
       <header className="bg-white shadow-lg sticky top-0 z-30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
-          {/* Bloco da Esquerda: Botão de Menu Mobile */}
           <div className="flex-1 flex justify-start">
             <button onClick={() => setMobileSidebarOpen(true)} className="lg:hidden p-2 -ml-2 text-gray-600 hover:text-blue-700">
               <Bars3Icon className="w-6 h-6"/>
             </button>
           </div>
-          {/* Bloco Central: Título */}
           <div className="flex-1 text-center">
             <h1 className="text-xl sm:text-2xl font-bold text-blue-700 tracking-tight whitespace-nowrap">{APP_TITLE}</h1>
           </div>
-          {/* Bloco da Direita: Informações do Usuário */}
           <div className="flex-1 flex justify-end">
             <div className="hidden sm:block text-sm text-gray-600 text-right">
               Usuário: <span className="font-semibold">{profile?.username || profile?.full_name || user.email}</span>

@@ -1,6 +1,11 @@
+// ARQUIVO: types.ts
+
 export interface Passenger {
   id: string; created_at?: string; user_id: string; name: string;
-  address: string; valuePerTrip: number;
+  address: string; phone: string; valuePerTrip: number;
+  notification_distance: number | null; // Distância em metros
+  latitude: number | null;
+  longitude: number | null;
 }
 export enum TripType { IDA = 'ida', VOLTA = 'volta', AMBOS = 'ambos' }
 export interface Trip {
@@ -17,7 +22,7 @@ export interface Profile {
 }
 export interface AppContextType {
   profile: Profile | null;
-  fetchData: () => Promise<void>; // Adicionado
+  fetchData: () => Promise<void>;
   updateProfile: (profile: Omit<Profile, 'id'|'updated_at'>) => Promise<void>;
   passengers: Passenger[];
   trips: Trip[];
@@ -35,5 +40,6 @@ export interface AppContextType {
 }
 export enum Tab {
   PASSENGERS = 'PASSENGERS', TRIPS = 'TRIPS', FUEL_LOGS = 'FUEL_LOGS',
-  BILLING = 'BILLING', REPORTS = 'REPORTS', PROFILE = 'PROFILE'
+  BILLING = 'BILLING', REPORTS = 'REPORTS', PROFILE = 'PROFILE',
+  NAVIGATION = 'NAVIGATION' // Nova aba
 }

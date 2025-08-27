@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Passenger } from '../types';
 import { useAppContext } from '../contexts/AppContext';
-import { UserPlusIcon } from './icons';
+import { UserPlusIcon, MagnifyingGlassIcon } from './icons'; // Importar o novo ícone
 
 interface PassengerFormProps {
   editingPassenger: Passenger | null;
@@ -37,12 +37,21 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ editingPassenger, onDone 
       setAddress('');
       setPhone('');
       setValuePerTrip('');
-      setNotificationDistance('200'); // Valor padrão de 200 metros
+      setNotificationDistance('200');
       setLatitude('');
       setLongitude('');
     }
     setErrors({});
   }, [editingPassenger]);
+  
+  const handleSearchCoordinates = () => {
+    if (!address.trim()) {
+      alert("Por favor, preencha o campo de endereço antes de buscar as coordenadas.");
+      return;
+    }
+    const searchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+    window.open(searchUrl, '_blank');
+  };
 
   const validate = () => {
     const newErrors: { name?: string; address?: string; phone?: string; valuePerTrip?: string; latitude?: string; longitude?: string; } = {};
@@ -98,22 +107,29 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ editingPassenger, onDone 
         {editingPassenger ? 'Editar Passageiro' : 'Registrar Novo Passageiro'}
       </h3>
       
-      {/* Campos existentes: Nome, Endereço, Telefone, Valor por Viagem */}
       <div>
         <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
         <input type="text" id="name" value={name} onChange={(e) => setName(e.target.value)} className={`w-full px-4 py-2 border rounded-md shadow-sm ${errors.name ? 'border-red-500' : 'border-gray-300'}`} required />
         {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
       </div>
+
       <div>
         <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">Endereço</label>
-        <input type="text" id="address" value={address} onChange={(e) => setAddress(e.target.value)} className={`w-full px-4 py-2 border rounded-md shadow-sm ${errors.address ? 'border-red-500' : 'border-gray-300'}`} required />
-         {errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
+        <div className="flex items-center space-x-2">
+            <input type="text" id="address" value={address} onChange={(e) => setAddress(e.target.value)} className={`w-full px-4 py-2 border rounded-md shadow-sm ${errors.address ? 'border-red-500' : 'border-gray-300'}`} required />
+            <button type="button" onClick={handleSearchCoordinates} className="px-3 py-2 bg-gray-100 hover:bg-gray-200 border rounded-md" title="Buscar coordenadas no Google Maps">
+                <MagnifyingGlassIcon className="w-5 h-5 text-gray-600"/>
+            </button>
+        </div>
+        {errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
       </div>
+
       <div>
         <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
         <input type="text" id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} className={`w-full px-4 py-2 border rounded-md shadow-sm ${errors.phone ? 'border-red-500' : 'border-gray-300'}`} required />
         {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
       </div>
+
        <div>
         <label htmlFor="valuePerTrip" className="block text-sm font-medium text-gray-700 mb-1">Valor por Viagem (R$)</label>
         <input type="number" id="valuePerTrip" value={valuePerTrip} onChange={(e) => setValuePerTrip(e.target.value)} min="0.01" step="0.01" className={`w-full px-4 py-2 border rounded-md shadow-sm ${errors.valuePerTrip ? 'border-red-500' : 'border-gray-300'}`} required/>

@@ -11,6 +11,7 @@ import ProfileTab from './components/tabs/ProfileTab';
 import Login from './components/Login';
 import Register from './components/Register';
 import ForgotPassword from './components/ForgotPassword';
+import CompleteProfile from './components/CompleteProfile'; // <-- 1. IMPORTAR O COMPONENTE
 import { Tab } from './types';
 import { APP_TITLE, TAB_NAMES } from './constants';
 import { 
@@ -25,6 +26,12 @@ const MainApp: React.FC<{ user: User }> = ({ user }) => {
   const [activeTab, setActiveTab] = useState<Tab>(Tab.PASSENGERS);
   const [isSidebarMinimized, setIsSidebarMinimized] = useState(false);
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
+  // <-- 2. LÓGICA PARA VERIFICAR O PERFIL -->
+  // Se o perfil existe mas não tem username, mostra a tela para completar
+  if (profile && !profile.username) {
+    return <CompleteProfile />;
+  }
 
   const handleLogout = async () => {
     if (window.confirm("Tem certeza que deseja sair?")) { await supabase.auth.signOut(); }

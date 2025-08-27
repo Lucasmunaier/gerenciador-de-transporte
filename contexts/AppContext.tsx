@@ -19,6 +19,7 @@ export const AppProvider = ({ children, user }: AppProviderProps) => {
     const fetchData = async () => {
         if (!user) return;
         
+        
         const { data: profileData } = await supabase.from('profiles').select('*').eq('id', user.id).single();
         setProfile(profileData || null);
 
@@ -104,7 +105,7 @@ export const AppProvider = ({ children, user }: AppProviderProps) => {
         await fetchData();
     };
 
-    const contextValue = { profile, updateProfile, passengers, trips, fuelLogs, addPassenger, updatePassenger, deletePassenger, addTrip, updateTrip, deleteTrip, markTripsAsPaid, addFuelLog, updateFuelLog, deleteFuelLog };
+    const contextValue = { profile, fetchData, updateProfile, passengers, trips, fuelLogs, addPassenger, updatePassenger, deletePassenger, addTrip, updateTrip, deleteTrip, markTripsAsPaid, addFuelLog, updateFuelLog, deleteFuelLog };
 
     return <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>;
 };

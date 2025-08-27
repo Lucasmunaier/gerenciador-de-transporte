@@ -1,8 +1,18 @@
+// ARQUIVO: components/ChargeModal.tsx
+
 import React, { useRef } from 'react';
 import { Passenger, Trip, TripType } from '../types';
 import { useAppContext } from '../contexts/AppContext';
 import { DocumentArrowDownIcon, CheckCircleIcon } from './icons';
 import { TRIP_TYPE_OPTIONS } from '../constants';
+
+// Ícone do WhatsApp para usar no botão
+const WhatsAppIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}>
+    <path d="M16.6 14c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.2-.6.7-.8.9-.1.1-.3.1-.5 0-.2-.1-1-.4-1.9-1.2-.7-.6-1.2-1.4-1.3-1.6-.1-.2 0-.4.1-.5.1-.1.2-.3.4-.4.1-.1.2-.2.3-.3.1-.1.2-.3.1-.5-.1-.2-.6-1.5-.8-2.1-.2-.5-.4-.5-.6-.5h-.5c-.2 0-.5.2-.6.4-.2.2-.7.7-.7 1.6 0 1 .7 1.9.8 2 .1.1 1.5 2.3 3.6 3.2.5.2.9.4 1.2.5.5.2 1 .1 1.3-.1.4-.2.6-.7.8-.9.1-.2.1-.4 0-.5l-.2-.1zM12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8z" />
+  </svg>
+);
+
 
 interface ChargeModalProps {
   passenger: Passenger;
@@ -10,7 +20,6 @@ interface ChargeModalProps {
   onClose: () => void;
 }
 
-// Ensure jspdf and html2canvas are declared globally if using script tags
 declare global {
   interface Window {
     jspdf: any;
@@ -32,39 +41,18 @@ const ChargeModal: React.FC<ChargeModalProps> = ({ passenger, unpaidTrips, onClo
     onClose();
   };
 
-  const handleExportPDF = () => {
+  const generateAndDownloadPDF = () => {
     if (modalContentRef.current && window.html2canvas && window.jspdf) {
       const { jsPDF } = window.jspdf;
-      // Temporarily make the total due visible for PDF capture if it's outside the main scrollable area
-      const footerTotalElement = modalContentRef.current.querySelector('#pdf-total-due-display');
-      if (footerTotalElement) {
-        (footerTotalElement as HTMLElement).style.display = 'block';
-      }
-
       window.html2canvas(modalContentRef.current, { scale: 2, scrollY: -window.scrollY }).then((canvas) => {
-        if (footerTotalElement) {
-          (footerTotalElement as HTMLElement).style.display = 'none'; // Hide it again after capture
-        }
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF('p', 'mm', 'a4');
         const pdfWidth = pdf.internal.pageSize.getWidth();
-        // const pdfHeight = pdf.internal.pageSize.getHeight(); // Not used directly for scaling image
         const imgWidth = canvas.width;
         const imgHeight = canvas.height;
-        const ratio = pdfWidth / imgWidth; // Scale to fit width, allow height to adjust
-        
+        const ratio = pdfWidth / imgWidth;
         let finalImgHeight = imgHeight * ratio;
-        let position = 10; // Initial top margin
-
-        // Check if image is too tall for one page after scaling
-        if (finalImgHeight > pdf.internal.pageSize.getHeight() - 20) { // -20 for top/bottom margins
-          // Implement multi-page if necessary, or simply scale to fit height (might make it too small)
-          // For simplicity, we'll just add it and let it be cut if too long, or user can scroll on PDF.
-          // A more robust solution would involve splitting the canvas or image.
-           finalImgHeight = pdf.internal.pageSize.getHeight() - 20; // Crop to fit
-        }
-
-        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, finalImgHeight);
+        pdf.addImage(imgData, 'PNG', 0, 10, pdfWidth, finalImgHeight);
         pdf.save(`cobranca_${passenger.name.replace(/\s+/g, '_')}_${new Date().toLocaleDateString('sv')}.pdf`);
       });
     } else {
@@ -72,7 +60,26 @@ const ChargeModal: React.FC<ChargeModalProps> = ({ passenger, unpaidTrips, onClo
     }
   };
   
-  const getTripTypeLabel = (type: TripType | string) => { // Allow string for safety, though TripType is expected
+  const handleWhatsAppAndDownload = () => {
+    // Passo 1: Gerar e baixar o PDF
+    generateAndDownloadPDF();
+
+    // Passo 2: Abrir a conversa no WhatsApp
+    if (!passenger.phone) {
+      alert("Este passageiro não possui um número de telefone cadastrado.");
+      return;
+    }
+    const phone = `55${passenger.phone.replace(/\D/g, '')}`;
+    const message = `Olá ${passenger.name}! O PDF com os detalhes da sua cobrança de R$${totalDue.toFixed(2)} foi baixado e está pronto para ser anexado aqui. Obrigado!`;
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+    
+    // Pequeno delay para garantir que o download iniciou antes de abrir a nova aba
+    setTimeout(() => {
+        window.open(url, '_blank');
+    }, 500);
+  };
+  
+  const getTripTypeLabel = (type: TripType | string) => {
     return TRIP_TYPE_OPTIONS.find(opt => opt.value === type)?.label || String(type);
   };
 
@@ -80,7 +87,7 @@ const ChargeModal: React.FC<ChargeModalProps> = ({ passenger, unpaidTrips, onClo
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50" role="dialog" aria-modal="true" aria-labelledby="chargeModalTitle">
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
-        <div ref={modalContentRef} className="p-6 overflow-y-auto"> {/* This div is captured by html2canvas */}
+        <div ref={modalContentRef} className="p-6 overflow-y-auto">
           <h3 id="chargeModalTitle" className="text-2xl font-semibold text-gray-800 mb-2">Cobrança para {passenger.name}</h3>
           <p className="text-sm text-gray-600 mb-6">Endereço: {passenger.address}</p>
 
@@ -116,10 +123,6 @@ const ChargeModal: React.FC<ChargeModalProps> = ({ passenger, unpaidTrips, onClo
                   <span className="text-2xl font-bold text-blue-700">R$ {totalDue.toFixed(2)}</span>
                 </div>
               </div>
-              {/* Hidden element for PDF total, if needed outside main content flow - though current placement is fine */}
-              <div id="pdf-total-due-display" style={{display: 'none', textAlign: 'right', marginTop: '20px', fontSize: '1.5rem', fontWeight: 'bold', color: '#1D4ED8' }}>
-                 Total a Pagar: R$ {totalDue.toFixed(2)}
-              </div>
             </>
           )}
         </div>
@@ -133,20 +136,23 @@ const ChargeModal: React.FC<ChargeModalProps> = ({ passenger, unpaidTrips, onClo
             Fechar
           </button>
           {unpaidTrips.length > 0 && (
-            <button
-              onClick={handleMarkAsPaid}
-              className="flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 transition duration-150"
-            >
-              <CheckCircleIcon className="w-5 h-5 mr-2" />
-              Marcar como Pago
-            </button>
+            <>
+              <button
+                onClick={handleMarkAsPaid}
+                className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition duration-150"
+              >
+                <CheckCircleIcon className="w-5 h-5 mr-2" />
+                Marcar como Pago
+              </button>
+            </>
           )}
            <button
-            onClick={handleExportPDF}
-            className="flex items-center justify-center px-4 py-2 border border-blue-500 text-blue-600 rounded-md text-sm font-medium hover:bg-blue-50 transition duration-150"
+            onClick={handleWhatsAppAndDownload}
+            disabled={unpaidTrips.length === 0}
+            className="flex items-center justify-center px-4 py-2 bg-green-500 text-white rounded-md text-sm font-medium hover:bg-green-600 transition duration-150 disabled:opacity-50"
           >
-            <DocumentArrowDownIcon className="w-5 h-5 mr-2" />
-            Exportar PDF
+            <WhatsAppIcon className="w-5 h-5 mr-2" />
+            Enviar Cobrança via WhatsApp
           </button>
         </div>
       </div>

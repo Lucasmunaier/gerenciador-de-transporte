@@ -84,7 +84,7 @@ const BillingTab: React.FC = () => {
       {isModalOpen && selectedPassenger && (
         <ChargeModal 
           passenger={selectedPassenger}
-          unpaidTrips={billingData.find(d => d.passenger.id === selectedPassenger.id)?.unpaidTrips || []}
+          unpaidTrips={billingData.find(d => d.id === selectedPassenger.id)?.unpaidTrips || []}
           onClose={handleCloseModal}
         />
       )}

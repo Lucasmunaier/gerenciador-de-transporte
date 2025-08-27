@@ -19,7 +19,7 @@ declare global {
 }
 
 const ChargeModal: React.FC<ChargeModalProps> = ({ passenger, unpaidTrips, onClose }) => {
-  const { markTripsAsPaid } = useAppContext();
+  const { markTripsAsPaid, profile } = useAppContext();
   const modalContentRef = useRef<HTMLDivElement>(null);
 
   const totalDue = unpaidTrips.reduce((sum, trip) => sum + trip.tripValue, 0);
@@ -102,6 +102,14 @@ const ChargeModal: React.FC<ChargeModalProps> = ({ passenger, unpaidTrips, onClo
                   ))}
                 </ul>
               </div>
+              {profile?.pix_key && (
+                <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-sm text-blue-800">
+                        <strong>Chave PIX para pagamento:</strong>
+                        <span className="font-mono ml-2 bg-blue-100 px-2 py-1 rounded">{profile.pix_key}</span>
+                    </p>
+                </div>
+              )}
               <div className="mt-6 pt-4 border-t border-gray-300">
                 <div className="flex justify-end items-center">
                   <span className="text-lg font-semibold text-gray-700 mr-2">Total a Pagar:</span>

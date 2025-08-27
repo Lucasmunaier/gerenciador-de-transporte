@@ -9,6 +9,7 @@ const ProfileTab: React.FC = () => {
   const [username, setUsername] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
+  const [pixKey, setPixKey] = useState('');
   const [loadingProfile, setLoadingProfile] = useState(false);
   
   const [currentPassword, setCurrentPassword] = useState('');
@@ -24,6 +25,7 @@ const ProfileTab: React.FC = () => {
       setUsername(profile.username || '');
       setPhone(profile.phone || '');
       setAddress(profile.address || '');
+      setPixKey(profile.pix_key || '');
     }
   }, [profile]);
 
@@ -31,7 +33,7 @@ const ProfileTab: React.FC = () => {
     e.preventDefault();
     setLoadingProfile(true);
     try {
-        await updateProfile({ full_name: fullName, username, phone, address });
+        await updateProfile({ full_name: fullName, username, phone, address, pix_key: pixKey });
         alert('Perfil atualizado com sucesso!');
     } catch (error: any) {
         alert(`Erro ao atualizar perfil: ${error.message}`);
@@ -110,6 +112,11 @@ const ProfileTab: React.FC = () => {
         <div>
           <label htmlFor="address" className="block text-sm font-medium text-gray-700">Endereço</label>
           <input type="text" id="address" value={address} onChange={e => setAddress(e.target.value)} className="mt-1 block w-full md:w-1/2 border border-gray-300 rounded-md shadow-sm py-2 px-3"/>
+        </div>
+
+        <div>
+          <label htmlFor="pixKey" className="block text-sm font-medium text-gray-700">Chave PIX</label>
+          <input type="text" id="pixKey" value={pixKey} onChange={e => setPixKey(e.target.value)} className="mt-1 block w-full md:w-1/2 border border-gray-300 rounded-md shadow-sm py-2 px-3" placeholder="Sua chave PIX para recebimentos"/>
         </div>
 
         <button type="submit" disabled={loadingProfile} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50">

@@ -13,7 +13,7 @@ export interface FuelLog {
 }
 export interface Profile {
   id: string; updated_at?: string; username: string | null; full_name: string | null;
-  phone?: string | null; address?: string | null;
+  phone?: string | null; address?: string | null; pix_key?: string | null;
 }
 export interface AppContextType {
   profile: Profile | null;

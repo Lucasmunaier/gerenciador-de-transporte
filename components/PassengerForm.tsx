@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Passenger } from '../types';
 import { useAppContext } from '../contexts/AppContext';
-import { UserPlusIcon, MagnifyingGlassIcon } from './icons'; // Importar o novo ícone
+import { UserPlusIcon, MagnifyingGlassIcon } from './icons';
 
 interface PassengerFormProps {
   editingPassenger: Passenger | null;
@@ -49,7 +49,8 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ editingPassenger, onDone 
       alert("Por favor, preencha o campo de endereço antes de buscar as coordenadas.");
       return;
     }
-    const searchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+    // URL ATUALIZADA para usar mapcoordinates.net
+    const searchUrl = `https://www.mapcoordinates.net/pt/ponteiro-coordenadas-no-mapa/${encodeURIComponent(address)}`;
     window.open(searchUrl, '_blank');
   };
 
@@ -117,7 +118,7 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ editingPassenger, onDone 
         <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">Endereço</label>
         <div className="flex items-center space-x-2">
             <input type="text" id="address" value={address} onChange={(e) => setAddress(e.target.value)} className={`w-full px-4 py-2 border rounded-md shadow-sm ${errors.address ? 'border-red-500' : 'border-gray-300'}`} required />
-            <button type="button" onClick={handleSearchCoordinates} className="px-3 py-2 bg-gray-100 hover:bg-gray-200 border rounded-md" title="Buscar coordenadas no Google Maps">
+            <button type="button" onClick={handleSearchCoordinates} className="px-3 py-2 bg-gray-100 hover:bg-gray-200 border rounded-md" title="Buscar coordenadas">
                 <MagnifyingGlassIcon className="w-5 h-5 text-gray-600"/>
             </button>
         </div>
@@ -152,7 +153,7 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ editingPassenger, onDone 
                 {errors.longitude && <p className="text-red-500 text-xs mt-1">{errors.longitude}</p>}
             </div>
         </div>
-        <p className="text-xs text-gray-500 mt-1">Dica: Clique com o botão direito no endereço no Google Maps para obter as coordenadas.</p>
+        <p className="text-xs text-gray-500 mt-1">Dica: Use o botão de busca para encontrar as coordenadas pelo endereço e cole-as aqui.</p>
 
         <div className="mt-4">
             <label htmlFor="notificationDistance" className="block text-sm font-medium text-gray-700 mb-1">Distância para Notificação (metros)</label>

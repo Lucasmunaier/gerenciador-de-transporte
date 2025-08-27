@@ -70,7 +70,7 @@ const ChargeModal: React.FC<ChargeModalProps> = ({ passenger, unpaidTrips, onClo
       return;
     }
     const phone = `55${passenger.phone.replace(/\D/g, '')}`;
-    const message = `Olá ${passenger.name}! O PDF com os detalhes da sua cobrança de R$${totalDue.toFixed(2)} foi baixado e está pronto para ser anexado aqui. Obrigado!`;
+    const message = `Olá ${passenger.name}! O PDF com os detalhes da sua cobrança é de R$${totalDue.toFixed(2)}. Obrigado!`;
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
     
     // Pequeno delay para garantir que o download iniciou antes de abrir a nova aba

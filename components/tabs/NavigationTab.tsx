@@ -2,6 +2,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAppContext } from '../../contexts/AppContext';
 import { Passenger } from '../../types';
 
+// O tipo WakeLockSentinel pode não estar definido por padrão, então o adicionamos aqui.
+declare global {
+  interface WakeLockSentinel extends EventTarget { // CORREÇÃO: Adicionado "extends EventTarget" para compatibilidade total
+    release(): Promise<void>;
+    readonly released: boolean;
+    // CORREÇÃO: Tipo ajustado para corresponder à definição oficial do navegador.
+    onrelease: ((this: WakeLockSentinel, ev: Event) => any) | null;
+  }
+}
+
+
 // Helper function to calculate distance using Haversine formula
 const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
   const R = 6371e3; // Earth's radius in meters
@@ -44,6 +55,37 @@ const NavigationTab: React.FC = () => {
 
     const watchId = useRef<number | null>(null);
     const notificationAudioRef = useRef<HTMLAudioElement | null>(null);
+    const wakeLockSentinel = useRef<WakeLockSentinel | null>(null);
+
+    useEffect(() => {
+        const acquireWakeLock = async () => {
+            if ('wakeLock' in navigator) {
+                try {
+                    wakeLockSentinel.current = await navigator.wakeLock.request('screen');
+                    console.log('Wake Lock ativado.');
+                } catch (err: any) {
+                    console.error(`Falha ao ativar o Wake Lock: ${err.name}, ${err.message}`);
+                }
+            }
+        };
+
+        const releaseWakeLock = async () => {
+            if (wakeLockSentinel.current) {
+                await wakeLockSentinel.current.release();
+                wakeLockSentinel.current = null;
+                console.log('Wake Lock liberado.');
+            }
+        };
+
+        if (isNavigating) {
+            acquireWakeLock();
+        }
+
+        return () => {
+            releaseWakeLock();
+        };
+    }, [isNavigating]);
+
 
     useEffect(() => {
         const validPassengers = passengers.filter(p => p.latitude != null && p.longitude != null);

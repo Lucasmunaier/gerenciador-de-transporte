@@ -1,14 +1,20 @@
+// ARQUIVO: components/PassengerForm.tsx (com melhorias na busca)
+
 import React, { useState, useEffect } from 'react';
 import { Passenger } from '../types';
 import { useAppContext } from '../contexts/AppContext';
 import { UserPlusIcon } from './icons';
 
-// Interface para o tipo de sugestão que a API retorna
 interface Suggestion {
   place_id: number;
   display_name: string;
   lat: string;
   lon: string;
+}
+
+interface PassengerFormProps {
+  editingPassenger: Passenger | null;
+  onDone: () => void;
 }
 
 const PassengerForm: React.FC<PassengerFormProps> = ({ editingPassenger, onDone }) => {
@@ -21,7 +27,6 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ editingPassenger, onDone 
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
 
-  // Estados para a funcionalidade de autocomplete
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
@@ -49,9 +54,8 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ editingPassenger, onDone 
     setErrors({});
   }, [editingPassenger]);
   
-  // Efeito para buscar sugestões de endereço enquanto o usuário digita
   useEffect(() => {
-    if (address.length < 3) {
+    if (address.length < 5) { // Aumentar um pouco o gatilho para evitar buscas muito genéricas
       setSuggestions([]);
       return;
     }
@@ -59,7 +63,7 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ editingPassenger, onDone 
     const handler = setTimeout(async () => {
       setIsSearching(true);
       try {
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=5`);
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=5&addressdetails=1`);
         const data = await response.json();
         setSuggestions(data);
       } catch (error) {
@@ -67,10 +71,10 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ editingPassenger, onDone 
       } finally {
         setIsSearching(false);
       }
-    }, 500); // Espera 500ms após o usuário parar de digitar
+    }, 500);
 
     return () => {
-      clearTimeout(handler); // Limpa o timer se o usuário continuar digitando
+      clearTimeout(handler);
     };
   }, [address]);
 
@@ -78,11 +82,11 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ editingPassenger, onDone 
     setAddress(suggestion.display_name);
     setLatitude(suggestion.lat);
     setLongitude(suggestion.lon);
-    setSuggestions([]); // Esconde a lista de sugestões
+    setSuggestions([]);
   };
 
-  const validate = () => { /* ... lógica de validação continua a mesma ... */ };
-  const handleSubmit = async (e: React.FormEvent) => { /* ... lógica de submit continua a mesma ... */ };
+  const validate = () => { /* ... */ return true; };
+  const handleSubmit = async (e: React.FormEvent) => { /* ... */ };
 
   return (
     <form onSubmit={handleSubmit} className="p-6 bg-white rounded-lg shadow-md space-y-6">
@@ -91,13 +95,11 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ editingPassenger, onDone 
         {editingPassenger ? 'Editar Passageiro' : 'Registrar Novo Passageiro'}
       </h3>
       
-      {/* ... outros campos ... */}
       <div>
         <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
         <input type="text" id="name" value={name} onChange={(e) => setName(e.target.value)} className="w-full px-4 py-2 border rounded-md shadow-sm" required />
       </div>
       
-      {/* CAMPO DE ENDEREÇO COM SUGESTÕES */}
       <div className="relative">
         <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">Endereço</label>
         <input 
@@ -106,10 +108,12 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ editingPassenger, onDone 
           value={address} 
           onChange={(e) => setAddress(e.target.value)} 
           className="w-full px-4 py-2 border rounded-md shadow-sm"
-          placeholder="Comece a digitar o endereço..." 
+          placeholder="Digite o endereço completo (Rua, Nº, Cidade)..." 
           required 
           autoComplete="off"
         />
+        <p className="text-xs text-gray-500 mt-1">Dica: Para maior precisão, inclua a cidade e o estado na busca.</p>
+
         {isSearching && <div className="absolute top-9 right-3 w-5 h-5 border-t-2 border-blue-500 rounded-full animate-spin"></div>}
         {suggestions.length > 0 && (
           <ul className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
@@ -126,7 +130,6 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ editingPassenger, onDone 
         )}
       </div>
 
-      {/* ... outros campos ... */}
        <div>
         <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
         <input type="text" id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full px-4 py-2 border rounded-md shadow-sm" required />
@@ -166,9 +169,3 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ editingPassenger, onDone 
   );
 };
 export default PassengerForm;
-
-// Dummy definitions for functions not shown to avoid TS errors
-interface PassengerFormProps {
-  editingPassenger: Passenger | null;
-  onDone: () => void;
-}

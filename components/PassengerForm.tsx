@@ -50,7 +50,7 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ editingPassenger, onDone 
       return;
     }
     // URL ATUALIZADA para usar mapcoordinates.net
-    const searchUrl = `https://www.mapcoordinates.net/pt/ponteiro-coordenadas-no-mapa/${encodeURIComponent(address)}`;
+    const searchUrl = `https://www.mapcoordinates.net/pt`;
     window.open(searchUrl, '_blank');
   };
 

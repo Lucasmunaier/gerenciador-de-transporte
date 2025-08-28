@@ -2,17 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAppContext } from '../../contexts/AppContext';
 import { Passenger } from '../../types';
 
-// O tipo WakeLockSentinel pode não estar definido por padrão, então o adicionamos aqui.
-declare global {
-  interface WakeLockSentinel extends EventTarget { // CORREÇÃO: Adicionado "extends EventTarget" para compatibilidade total
-    release(): Promise<void>;
-    readonly released: boolean;
-    // CORREÇÃO: Tipo ajustado para corresponder à definição oficial do navegador.
-    onrelease: ((this: WakeLockSentinel, ev: Event) => any) | null;
-  }
-}
-
-
 // Helper function to calculate distance using Haversine formula
 const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
   const R = 6371e3; // Earth's radius in meters
@@ -55,37 +44,6 @@ const NavigationTab: React.FC = () => {
 
     const watchId = useRef<number | null>(null);
     const notificationAudioRef = useRef<HTMLAudioElement | null>(null);
-    const wakeLockSentinel = useRef<WakeLockSentinel | null>(null);
-
-    useEffect(() => {
-        const acquireWakeLock = async () => {
-            if ('wakeLock' in navigator) {
-                try {
-                    wakeLockSentinel.current = await navigator.wakeLock.request('screen');
-                    console.log('Wake Lock ativado.');
-                } catch (err: any) {
-                    console.error(`Falha ao ativar o Wake Lock: ${err.name}, ${err.message}`);
-                }
-            }
-        };
-
-        const releaseWakeLock = async () => {
-            if (wakeLockSentinel.current) {
-                await wakeLockSentinel.current.release();
-                wakeLockSentinel.current = null;
-                console.log('Wake Lock liberado.');
-            }
-        };
-
-        if (isNavigating) {
-            acquireWakeLock();
-        }
-
-        return () => {
-            releaseWakeLock();
-        };
-    }, [isNavigating]);
-
 
     useEffect(() => {
         const validPassengers = passengers.filter(p => p.latitude != null && p.longitude != null);
@@ -205,7 +163,7 @@ const NavigationTab: React.FC = () => {
                     {showNotification && (
                       <div className="my-6 p-4 bg-green-50 border-l-4 border-green-500 rounded-lg text-left animate-fade-in">
                         <p className="font-bold text-green-800">Você está perto!</p>
-                        <button onClick={sendWhatsAppNotification} className="mt-3 w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg transition-transform transform hover:scale-105">
+                        <button onClick={sendWhatsAppNotification} className="mt-3 w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg transition-transform transform hover:scale-105 active:scale-95">
                           <WhatsAppIcon className="h-5 w-5"/>
                           Avisar {passenger.name}
                         </button>
@@ -213,10 +171,10 @@ const NavigationTab: React.FC = () => {
                     )}
 
                     <div className="flex flex-col gap-4 w-full mt-8">
-                        <button onClick={nextStop} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-4 rounded-xl shadow-lg transition-transform transform hover:scale-105">
+                        <button onClick={nextStop} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-4 rounded-xl shadow-lg transition-transform transform hover:scale-105 active:scale-95">
                             Passageiro a Bordo / Próxima Parada
                         </button>
-                        <button onClick={stopNavigation} className="w-full bg-transparent hover:bg-red-500/10 text-red-500 font-semibold py-3 px-4 rounded-xl transition-colors">
+                        <button onClick={stopNavigation} className="w-full bg-transparent hover:bg-red-500/10 text-red-500 font-semibold py-3 px-4 rounded-xl transition-all transform active:scale-95">
                             Finalizar Rota
                         </button>
                     </div>
@@ -237,9 +195,9 @@ const NavigationTab: React.FC = () => {
                       </div>
                       <ul className="flex-grow overflow-y-auto p-4 space-y-2">
                         {availablePassengers.length > 0 ? availablePassengers.map(p => (
-                          <li key={p.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg transition-all duration-200 hover:shadow-md hover:bg-gray-100">
-                            <span className="font-medium text-gray-700">{p.name}</span>
-                            <button onClick={() => addToRoute(p)} title="Adicionar à rota" className="p-2 rounded-full bg-indigo-100 text-indigo-600 hover:bg-indigo-200 transition-colors">
+                          <li key={p.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg transition-all duration-200 hover:shadow-md hover:bg-gray-100 animate-pop-in">
+                            <span onClick={() => addToRoute(p)} className="font-medium flex-grow cursor-pointer text-gray-700">{p.name}</span>
+                            <button onClick={() => addToRoute(p)} title="Adicionar à rota" className="p-2 rounded-full bg-indigo-100 text-indigo-600 hover:bg-indigo-200 transition-all transform active:scale-95 ml-2">
                                 <PlusIcon className="h-5 w-5"/>
                             </button>
                           </li>
@@ -253,22 +211,22 @@ const NavigationTab: React.FC = () => {
                       </div>
                       <ul className="flex-grow overflow-y-auto p-4 space-y-2">
                         {route.length > 0 ? route.map((p, index) => (
-                          <li key={p.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg transition-all duration-200 hover:shadow-md hover:bg-gray-100">
-                            <div className="flex items-center gap-3">
-                                <span className="text-sm font-bold text-gray-500 bg-gray-200 rounded-full h-7 w-7 flex items-center justify-center">{index + 1}</span>
+                          <li key={p.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg transition-all duration-200 hover:shadow-md hover:bg-gray-100 animate-pop-in">
+                            <div onClick={() => removeFromRoute(p)} className="flex items-center gap-3 flex-grow cursor-pointer">
+                                <span className="text-sm font-bold text-gray-500 bg-gray-200 rounded-full h-7 w-7 flex items-center justify-center flex-shrink-0">{index + 1}</span>
                                 <span className="font-medium text-gray-700">{p.name}</span>
                             </div>
-                            <button onClick={() => removeFromRoute(p)} title="Remover da rota" className="p-2 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors">
+                            <button onClick={() => removeFromRoute(p)} title="Remover da rota" className="p-2 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-all transform active:scale-95 ml-2">
                                 <MinusIcon className="h-5 w-5"/>
                             </button>
                           </li>
-                        )) : <li className="text-center p-8 text-gray-500">Adicione passageiros para montar sua rota.</li>}
+                        )) : <li className="text-center p-8 text-gray-500">Adicione passageiros da esquerda para montar sua rota.</li>}
                       </ul>
                       <div className="p-6 border-t border-gray-200">
                           <button 
                             onClick={startNavigation} 
                             disabled={route.length === 0}
-                            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition-all duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none transform hover:scale-105 disabled:transform-none"
+                            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition-all duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none transform hover:scale-105 disabled:transform-none active:scale-95"
                           >
                               Iniciar Navegação
                           </button>

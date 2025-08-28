@@ -56,14 +56,13 @@ const NavigationTab: React.FC = () => {
     };
 
     const removeFromRoute = (passenger: Passenger) => {
-        // CORREÇÃO AQUI: Apenas adiciona de volta à lista de disponíveis e remove da rota.
         setAvailablePassengers([...availablePassengers, passenger]);
         setRoute(route.filter(p => p.id !== passenger.id));
     };
 
     const startNavigation = () => {
         if (route.length === 0) {
-            alert("Please add at least one passenger to the route to begin.");
+            alert("Adicione pelo menos um passageiro à rota para começar.");
             return;
         }
         setIsNavigating(true);
@@ -71,7 +70,7 @@ const NavigationTab: React.FC = () => {
         setShowNotification(false);
 
         if (!notificationAudioRef.current) {
-            notificationAudioRef.current = new Audio('/notification.mp3'); // Ensure this file is in your /public folder
+            notificationAudioRef.current = new Audio('/notification.mp3');
         }
         
         watchId.current = navigator.geolocation.watchPosition(
@@ -80,8 +79,8 @@ const NavigationTab: React.FC = () => {
                 setCurrentPosition({ lat: latitude, lon: longitude });
             },
             (error) => {
-                console.error("GPS Error:", error);
-                alert("Could not get your location. Please check GPS permissions.");
+                console.error("Erro no GPS:", error);
+                alert("Não foi possível obter sua localização. Verifique as permissões de GPS.");
                 stopNavigation();
             },
             { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
@@ -104,7 +103,7 @@ const NavigationTab: React.FC = () => {
             setShowNotification(false);
             setDistanceToNext(null);
         } else {
-            alert("Route finished!");
+            alert("Rota finalizada!");
             stopNavigation();
         }
     };
@@ -119,7 +118,7 @@ const NavigationTab: React.FC = () => {
                 const notificationDist = currentPassenger.notification_distance || 200;
                 if (dist <= notificationDist && !showNotification) {
                     setShowNotification(true);
-                    notificationAudioRef.current?.play().catch(e => console.error("Error playing sound:", e));
+                    notificationAudioRef.current?.play().catch(e => console.error("Erro ao tocar áudio:", e));
                 }
             }
         }
@@ -129,54 +128,54 @@ const NavigationTab: React.FC = () => {
         const passenger = route[currentStopIndex];
         if (!passenger.phone) return;
         const phone = `55${passenger.phone.replace(/\D/g, '')}`;
-        const message = "I'm arriving now, you can come out.";
+        const message = "Estou chegando, pode sair!";
         const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
         window.open(url, '_blank');
     };
 
     if (isNavigating) {
         const passenger = route[currentStopIndex];
-        if (!passenger) return <div className="p-8">Loading...</div>; // Safety check
+        if (!passenger) return <div className="p-8">Carregando...</div>;
         return (
-            <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 p-4 animate-fade-in">
-                <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 sm:p-8 text-center transition-all">
-                    <p className="text-sm font-medium text-indigo-600 dark:text-indigo-400">NEXT STOP ({currentStopIndex + 1}/{route.length})</p>
-                    <h2 className="text-3xl font-bold text-gray-800 dark:text-white mt-1">{passenger.name}</h2>
-                    <p className="text-gray-500 dark:text-gray-400 mt-1">{passenger.address}</p>
+            <div className="flex flex-col items-center justify-center min-h-full bg-gray-50 p-4 animate-fade-in">
+                <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 sm:p-8 text-center transition-all">
+                    <p className="text-sm font-medium text-indigo-600">PRÓXIMA PARADA ({currentStopIndex + 1}/{route.length})</p>
+                    <h2 className="text-3xl font-bold text-gray-800 mt-1">{passenger.name}</h2>
+                    <p className="text-gray-500 mt-1">{passenger.address}</p>
                     
                     <div className="my-8">
-                         <div className="relative w-48 h-48 sm:w-56 sm:h-56 mx-auto bg-gray-100 dark:bg-gray-700/50 rounded-full flex flex-col items-center justify-center shadow-inner">
+                         <div className="relative w-48 h-48 sm:w-56 sm:h-56 mx-auto bg-gray-100 rounded-full flex flex-col items-center justify-center shadow-inner">
                             {distanceToNext !== null ? (
                                 <>
-                                    <span className="text-5xl sm:text-6xl font-extrabold text-gray-800 dark:text-gray-100">
+                                    <span className="text-5xl sm:text-6xl font-extrabold text-gray-800">
                                         {distanceToNext > 1000 ? (distanceToNext / 1000).toFixed(1) : Math.round(distanceToNext)}
                                     </span>
-                                    <span className="text-lg text-gray-500 dark:text-gray-400 -mt-1">
-                                        {distanceToNext > 1000 ? 'km' : 'meters'}
+                                    <span className="text-lg text-gray-500 -mt-1">
+                                        {distanceToNext > 1000 ? 'km' : 'metros'}
                                     </span>
                                 </>
                             ) : (
-                                <span className="text-xl font-semibold text-gray-500 animate-pulse">Calculating...</span>
+                                <span className="text-xl font-semibold text-gray-500 animate-pulse">Calculando...</span>
                             )}
                         </div>
                     </div>
                     
                     {showNotification && (
-                      <div className="my-6 p-4 bg-green-50 dark:bg-green-900/50 border-l-4 border-green-500 rounded-lg text-left animate-fade-in">
-                        <p className="font-bold text-green-800 dark:text-green-300">You are close!</p>
+                      <div className="my-6 p-4 bg-green-50 border-l-4 border-green-500 rounded-lg text-left animate-fade-in">
+                        <p className="font-bold text-green-800">Você está perto!</p>
                         <button onClick={sendWhatsAppNotification} className="mt-3 w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg transition-transform transform hover:scale-105">
                           <WhatsAppIcon className="h-5 w-5"/>
-                          Notify {passenger.name}
+                          Avisar {passenger.name}
                         </button>
                       </div>
                     )}
 
                     <div className="flex flex-col gap-4 w-full mt-8">
                         <button onClick={nextStop} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-4 rounded-xl shadow-lg transition-transform transform hover:scale-105">
-                            Passenger Boarded / Next Stop
+                            Passageiro a Bordo / Próxima Parada
                         </button>
                         <button onClick={stopNavigation} className="w-full bg-transparent hover:bg-red-500/10 text-red-500 font-semibold py-3 px-4 rounded-xl transition-colors">
-                            End Route
+                            Finalizar Rota
                         </button>
                     </div>
                 </div>
@@ -185,51 +184,51 @@ const NavigationTab: React.FC = () => {
     }
 
     return (
-      <div className="p-4 sm:p-6 lg:p-8 text-gray-800 dark:text-gray-200">
+      <div className="p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
-              <h1 className="text-3xl font-bold mb-8 text-center text-gray-900 dark:text-white">Plan Your Route</h1>
+              <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">Planeje sua Rota</h1>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                  <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg flex flex-col h-[70vh]">
-                      <div className="flex items-center gap-3 p-6 border-b border-gray-200 dark:border-gray-700">
+                  <div className="bg-white rounded-2xl shadow-lg flex flex-col h-[70vh]">
+                      <div className="flex items-center gap-3 p-6 border-b border-gray-200">
                           <UserGroupIcon className="h-6 w-6 text-indigo-500"/>
-                          <h3 className="text-xl font-semibold">Available Passengers</h3>
+                          <h3 className="text-xl font-semibold text-gray-800">Passageiros Disponíveis</h3>
                       </div>
                       <ul className="flex-grow overflow-y-auto p-4 space-y-2">
                         {availablePassengers.length > 0 ? availablePassengers.map(p => (
-                          <li key={p.id} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg transition-all duration-200 hover:shadow-md hover:bg-gray-100 dark:hover:bg-gray-700">
-                            <span className="font-medium">{p.name}</span>
-                            <button onClick={() => addToRoute(p)} title="Add to route" className="p-2 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-200 dark:hover:bg-indigo-900 transition-colors">
+                          <li key={p.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg transition-all duration-200 hover:shadow-md hover:bg-gray-100">
+                            <span className="font-medium text-gray-700">{p.name}</span>
+                            <button onClick={() => addToRoute(p)} title="Adicionar à rota" className="p-2 rounded-full bg-indigo-100 text-indigo-600 hover:bg-indigo-200 transition-colors">
                                 <PlusIcon className="h-5 w-5"/>
                             </button>
                           </li>
-                        )) : <li className="text-center p-8 text-gray-500">No more available passengers.</li>}
+                        )) : <li className="text-center p-8 text-gray-500">Nenhum passageiro disponível.</li>}
                       </ul>
                   </div>
-                  <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg flex flex-col h-[70vh]">
-                      <div className="flex items-center gap-3 p-6 border-b border-gray-200 dark:border-gray-700">
+                  <div className="bg-white rounded-2xl shadow-lg flex flex-col h-[70vh]">
+                      <div className="flex items-center gap-3 p-6 border-b border-gray-200">
                            <RouteIcon className="h-6 w-6 text-green-500"/>
-                           <h3 className="text-xl font-semibold">Today's Route</h3>
+                           <h3 className="text-xl font-semibold text-gray-800">Rota do Dia</h3>
                       </div>
                       <ul className="flex-grow overflow-y-auto p-4 space-y-2">
                         {route.length > 0 ? route.map((p, index) => (
-                          <li key={p.id} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg transition-all duration-200 hover:shadow-md hover:bg-gray-100 dark:hover:bg-gray-700">
+                          <li key={p.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg transition-all duration-200 hover:shadow-md hover:bg-gray-100">
                             <div className="flex items-center gap-3">
-                                <span className="text-sm font-bold text-gray-500 dark:text-gray-400 bg-gray-200 dark:bg-gray-600 rounded-full h-7 w-7 flex items-center justify-center">{index + 1}</span>
-                                <span className="font-medium">{p.name}</span>
+                                <span className="text-sm font-bold text-gray-500 bg-gray-200 rounded-full h-7 w-7 flex items-center justify-center">{index + 1}</span>
+                                <span className="font-medium text-gray-700">{p.name}</span>
                             </div>
-                            <button onClick={() => removeFromRoute(p)} title="Remove from route" className="p-2 rounded-full bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900 transition-colors">
+                            <button onClick={() => removeFromRoute(p)} title="Remover da rota" className="p-2 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors">
                                 <MinusIcon className="h-5 w-5"/>
                             </button>
                           </li>
-                        )) : <li className="text-center p-8 text-gray-500">Add passengers from the left to build your route.</li>}
+                        )) : <li className="text-center p-8 text-gray-500">Adicione passageiros para montar sua rota.</li>}
                       </ul>
-                      <div className="p-6 border-t border-gray-200 dark:border-gray-700">
+                      <div className="p-6 border-t border-gray-200">
                           <button 
                             onClick={startNavigation} 
                             disabled={route.length === 0}
                             className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition-all duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none transform hover:scale-105 disabled:transform-none"
                           >
-                              Start Navigation
+                              Iniciar Navegação
                           </button>
                       </div>
                   </div>

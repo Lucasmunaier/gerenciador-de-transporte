@@ -1,10 +1,9 @@
-// ARQUIVO: components/PassengerForm.tsx
-
 import React, { useState, useEffect } from 'react';
 import { Passenger } from '../types';
 import { useAppContext } from '../contexts/AppContext';
 import { UserPlusIcon, MagnifyingGlassIcon } from './icons';
 
+// A INTERFACE QUE FALTAVA FOI ADICIONADA AQUI
 interface PassengerFormProps {
   editingPassenger: Passenger | null;
   onDone: () => void;
@@ -22,6 +21,7 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ editingPassenger, onDone 
 
   const [errors, setErrors] = useState<{ name?: string; address?: string; phone?: string; valuePerTrip?: string; latitude?: string; longitude?: string; }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGeocoding, setIsGeocoding] = useState(false);
 
   useEffect(() => {
     if (editingPassenger) {
@@ -44,14 +44,30 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ editingPassenger, onDone 
     setErrors({});
   }, [editingPassenger]);
   
-  const handleSearchCoordinates = () => {
+  const handleGeocodeAddress = async () => {
     if (!address.trim()) {
       alert("Por favor, preencha o campo de endereço antes de buscar as coordenadas.");
       return;
     }
-    // URL ATUALIZADA para usar mapcoordinates.net
-    const searchUrl = `https://www.mapcoordinates.net/pt`;
-    window.open(searchUrl, '_blank');
+    setIsGeocoding(true);
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1`);
+      const data = await response.json();
+      
+      if (data && data.length > 0) {
+        const { lat, lon } = data[0];
+        setLatitude(lat);
+        setLongitude(lon);
+        alert("Coordenadas encontradas e preenchidas!");
+      } else {
+        alert("Não foi possível encontrar coordenadas para este endereço. Tente ser mais específico.");
+      }
+    } catch (error) {
+      console.error("Erro ao buscar coordenadas:", error);
+      alert("Ocorreu um erro ao buscar as coordenadas. Verifique o console.");
+    } finally {
+      setIsGeocoding(false);
+    }
   };
 
   const validate = () => {
@@ -113,13 +129,13 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ editingPassenger, onDone 
         <input type="text" id="name" value={name} onChange={(e) => setName(e.target.value)} className={`w-full px-4 py-2 border rounded-md shadow-sm ${errors.name ? 'border-red-500' : 'border-gray-300'}`} required />
         {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
       </div>
-
+      
       <div>
         <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">Endereço</label>
         <div className="flex items-center space-x-2">
-            <input type="text" id="address" value={address} onChange={(e) => setAddress(e.target.value)} className={`w-full px-4 py-2 border rounded-md shadow-sm ${errors.address ? 'border-red-500' : 'border-gray-300'}`} required />
-            <button type="button" onClick={handleSearchCoordinates} className="px-3 py-2 bg-gray-100 hover:bg-gray-200 border rounded-md" title="Buscar coordenadas">
-                <MagnifyingGlassIcon className="w-5 h-5 text-gray-600"/>
+            <input type="text" id="address" value={address} onChange={(e) => setAddress(e.target.value)} className={`w-full px-4 py-2 border rounded-md shadow-sm ${errors.address ? 'border-red-500' : 'border-gray-300'}`} placeholder="Ex: Rua, Número, Bairro, Cidade" required />
+            <button type="button" onClick={handleGeocodeAddress} disabled={isGeocoding} className="px-3 py-2 bg-gray-100 hover:bg-gray-200 border rounded-md disabled:opacity-50" title="Buscar coordenadas automaticamente">
+                {isGeocoding ? <div className="w-5 h-5 border-t-2 border-blue-500 rounded-full animate-spin"></div> : <MagnifyingGlassIcon className="w-5 h-5 text-gray-600"/>}
             </button>
         </div>
         {errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
@@ -139,22 +155,20 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ editingPassenger, onDone 
 
       <div className="pt-4 border-t">
         <h4 className="text-lg font-semibold text-gray-700">Configurações de Navegação</h4>
-        <p className="text-xs text-gray-500 mb-4">Esses dados são necessários para a funcionalidade da aba "Navegação".</p>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
             <div>
                 <label htmlFor="latitude" className="block text-sm font-medium text-gray-700 mb-1">Latitude</label>
-                <input type="text" id="latitude" value={latitude} onChange={(e) => setLatitude(e.target.value)} className={`w-full px-4 py-2 border rounded-md shadow-sm ${errors.latitude ? 'border-red-500' : 'border-gray-300'}`} placeholder="Ex: -19.912998"/>
+                <input type="text" id="latitude" value={latitude} onChange={(e) => setLatitude(e.target.value)} className={`w-full px-4 py-2 border rounded-md shadow-sm bg-gray-50 ${errors.latitude ? 'border-red-500' : 'border-gray-300'}`} placeholder="Preenchido pela busca"/>
                 {errors.latitude && <p className="text-red-500 text-xs mt-1">{errors.latitude}</p>}
             </div>
             <div>
                 <label htmlFor="longitude" className="block text-sm font-medium text-gray-700 mb-1">Longitude</label>
-                <input type="text" id="longitude" value={longitude} onChange={(e) => setLongitude(e.target.value)} className={`w-full px-4 py-2 border rounded-md shadow-sm ${errors.longitude ? 'border-red-500' : 'border-gray-300'}`} placeholder="Ex: -43.940933"/>
+                <input type="text" id="longitude" value={longitude} onChange={(e) => setLongitude(e.target.value)} className={`w-full px-4 py-2 border rounded-md shadow-sm bg-gray-50 ${errors.longitude ? 'border-red-500' : 'border-gray-300'}`} placeholder="Preenchido pela busca"/>
                 {errors.longitude && <p className="text-red-500 text-xs mt-1">{errors.longitude}</p>}
             </div>
         </div>
-        <p className="text-xs text-gray-500 mt-1">Dica: Use o botão de busca para encontrar as coordenadas pelo endereço e cole-as aqui.</p>
-
+        
         <div className="mt-4">
             <label htmlFor="notificationDistance" className="block text-sm font-medium text-gray-700 mb-1">Distância para Notificação (metros)</label>
             <input type="number" id="notificationDistance" value={notificationDistance} onChange={(e) => setNotificationDistance(e.target.value)} min="50" step="10" className="w-full md:w-1/2 px-4 py-2 border rounded-md shadow-sm border-gray-300"/>

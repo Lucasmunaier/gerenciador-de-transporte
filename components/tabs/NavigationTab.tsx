@@ -115,7 +115,7 @@ const NavigationTab: React.FC = () => {
     const passenger = route[currentStopIndex];
     if (!passenger.phone) return;
     const phone = `55${passenger.phone.replace(/\D/g, '')}`;
-    const message = "Olá! Já estou chegando para te buscar, pode sair.";
+    const message = "Já estou chegando, pode sair.";
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
   };

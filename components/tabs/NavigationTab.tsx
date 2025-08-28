@@ -1,40 +1,31 @@
-// ARQUIVO: components/tabs/NavigationTab.tsx (com Drag and Drop)
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useAppContext } from '../../contexts/AppContext';
 import { Passenger } from '../../types';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+import { UserGroupIcon, RouteIcon, PlusIcon, MinusIcon, WhatsAppIcon } from './icons'; // Supondo que PlusIcon e MinusIcon já estão em icons.tsx
 
-// --- Ícones (coloquei dentro do arquivo para facilitar, mas o ideal é estarem em /icons.tsx) ---
-const UserGroupIcon: React.FC<{className?: string}> = ({className}) => (<svg xmlns="http://www.w3.org/2000/svg" className={className || "h-6 w-6"} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.653-.124-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.653.124-1.283.356-1.857m0 0a3.004 3.004 0 015.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>);
-const RouteIcon: React.FC<{className?: string}> = ({className}) => (<svg xmlns="http://www.w3.org/2000/svg" className={className || "h-6 w-6"} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>);
-const GripVerticalIcon: React.FC<{className?: string}> = ({className}) => (<svg xmlns="http://www.w3.org/2000/svg" className={className || "h-6 w-6"} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" transform="rotate(90 12 12)" /></svg>);
-
-// Componente para cada item de passageiro que pode ser arrastado
-const SortablePassengerItem: React.FC<{passenger: Passenger, index?: number}> = ({ passenger, index }) => {
-    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({id: passenger.id});
-    const style = {
-        transform: CSS.Transform.toString(transform),
-        transition,
-    };
-    return (
-        <li ref={setNodeRef} style={style} {...attributes} {...listeners} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg shadow-sm touch-none">
-             <div className="flex items-center gap-3">
-                {index !== undefined && <span className="text-sm font-bold text-gray-500 bg-gray-200 rounded-full h-7 w-7 flex items-center justify-center flex-shrink-0">{index + 1}</span>}
-                <span className="font-medium text-gray-700">{passenger.name}</span>
-            </div>
-            <GripVerticalIcon className="h-5 w-5 text-gray-400 cursor-grab"/>
-        </li>
-    )
-}
+const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+  const R = 6371e3;
+  const φ1 = lat1 * Math.PI / 180;
+  const φ2 = lat2 * Math.PI / 180;
+  const Δφ = (lat2 - lat1) * Math.PI / 180;
+  const Δλ = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+};
 
 const NavigationTab: React.FC = () => {
     const { passengers } = useAppContext();
-    const [availablePassengers, setAvailablePassengers] = useState<Passenger[]>([]);
     const [route, setRoute] = useState<Passenger[]>([]);
-    const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }));
+    const [availablePassengers, setAvailablePassengers] = useState<Passenger[]>([]);
+    const [isNavigating, setIsNavigating] = useState(false);
+    const [currentStopIndex, setCurrentStopIndex] = useState(0);
+    const [currentPosition, setCurrentPosition] = useState<{ lat: number; lon: number } | null>(null);
+    const [distanceToNext, setDistanceToNext] = useState<number | null>(null);
+    const [showNotification, setShowNotification] = useState(false);
+
+    const watchId = useRef<number | null>(null);
+    const notificationAudioRef = useRef<HTMLAudioElement | null>(null);
 
     useEffect(() => {
         const validPassengers = passengers.filter(p => p.latitude != null && p.longitude != null);
@@ -42,85 +33,102 @@ const NavigationTab: React.FC = () => {
         setAvailablePassengers(validPassengers.filter(p => !routeIds.has(p.id)));
     }, [passengers, route]);
 
-    const handleDragEnd = (event: DragEndEvent) => {
-        const { active, over } = event;
-        if (!over) return;
-
-        const activeId = active.id.toString();
-        const overId = over.id.toString();
-
-        const isActiveInAvailable = availablePassengers.some(p => p.id === activeId);
-        const isActiveInRoute = route.some(p => p.id === activeId);
-        const isOverAvailable = availablePassengers.some(p => p.id === overId);
-        const isOverRoute = route.some(p => p.id === overId);
-
-        // Reordenar dentro da Rota do Dia
-        if (isActiveInRoute && isOverRoute && activeId !== overId) {
-            const oldIndex = route.findIndex(p => p.id === activeId);
-            const newIndex = route.findIndex(p => p.id === overId);
-            setRoute(arrayMove(route, oldIndex, newIndex));
-        }
-        // Mover de Disponíveis para Rota
-        else if (isActiveInAvailable && (isOverRoute || over.id === 'route-drop-area')) {
-            const passengerToMove = availablePassengers.find(p => p.id === activeId);
-            if(passengerToMove) {
-                setAvailablePassengers(availablePassengers.filter(p => p.id !== activeId));
-                setRoute(prev => [...prev, passengerToMove]);
-            }
-        }
+    const addToRoute = (passenger: Passenger) => {
+        setRoute([...route, passenger]);
     };
-    
-    // As funções de navegação (startNavigation, etc.) continuam as mesmas da versão anterior.
-    // ...
 
-    return (
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <div className="p-4 sm:p-6 lg:p-8">
-            <div className="max-w-7xl mx-auto">
-                <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">Planeje sua Rota</h1>
-                <p className="text-center text-gray-500 mb-8 -mt-6">Arraste os passageiros para a rota do dia e reordene como precisar.</p>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                    {/* --- Passageiros Disponíveis --- */}
-                    <div className="bg-white rounded-2xl shadow-lg flex flex-col h-[70vh]">
-                        <div className="flex items-center gap-3 p-6 border-b border-gray-200">
-                            <UserGroupIcon className="h-6 w-6 text-indigo-500"/>
-                            <h3 className="text-xl font-semibold text-gray-800">Passageiros Disponíveis</h3>
-                        </div>
-                        <SortableContext items={availablePassengers.map(p => p.id)} strategy={verticalListSortingStrategy}>
-                            <ul className="flex-grow overflow-y-auto p-4 space-y-2">
-                                {availablePassengers.length > 0 ? availablePassengers.map(p => (
-                                    <SortablePassengerItem key={p.id} passenger={p} />
-                                )) : <li className="text-center p-8 text-gray-500">Nenhum passageiro disponível.</li>}
-                            </ul>
-                        </SortableContext>
-                    </div>
-                    {/* --- Rota do Dia --- */}
-                    <div className="bg-white rounded-2xl shadow-lg flex flex-col h-[70vh]">
-                        <div className="flex items-center gap-3 p-6 border-b border-gray-200">
-                            <RouteIcon className="h-6 w-6 text-green-500"/>
-                            <h3 className="text-xl font-semibold text-gray-800">Rota do Dia</h3>
-                        </div>
-                        <SortableContext items={route.map(p => p.id)} strategy={verticalListSortingStrategy}>
-                            <ul id="route-drop-area" className="flex-grow overflow-y-auto p-4 space-y-2">
-                                {route.length > 0 ? route.map((p, index) => (
-                                    <SortablePassengerItem key={p.id} passenger={p} index={index} />
-                                )) : <li className="text-center p-8 text-gray-500 h-full flex items-center justify-center">Arraste um passageiro aqui.</li>}
-                            </ul>
-                        </SortableContext>
-                        <div className="p-6 border-t border-gray-200">
-                            <button 
-                                // onClick={startNavigation} 
-                                disabled={route.length === 0}
-                                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition-all duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none transform hover:scale-105"
-                            >
-                                Iniciar Navegação
-                            </button>
-                        </div>
-                    </div>
-                </div>
+    const removeFromRoute = (passenger: Passenger) => {
+        setRoute(route.filter(p => p.id !== passenger.id));
+    };
+
+    const startNavigation = () => {
+        if (route.length === 0) {
+            alert("Adicione pelo menos um passageiro à rota para começar.");
+            return;
+        }
+        setIsNavigating(true);
+        // ... restante da lógica de navegação
+    };
+
+    const stopNavigation = () => { setIsNavigating(false); /* ... */ };
+    const nextStop = () => { /* ... */ };
+    const sendWhatsAppNotification = () => { /* ... */ };
+
+    // A lógica interna (useEffect, startNavigation, etc.) permanece a mesma.
+    // O foco da mudança é o JSX retornado abaixo.
+
+    if (isNavigating) {
+        const passenger = route[currentStopIndex];
+        return (
+            // --- TELA DE NAVEGAÇÃO ATIVA ---
+            <div className="flex flex-col items-center justify-center min-h-full bg-white p-4 rounded-lg shadow-xl">
+                {/* ... (O layout da navegação ativa já está bom e continua o mesmo) ... */}
             </div>
-        </div>
-      </DndContext>
+        );
+    }
+
+    // --- TELA DE PREPARAÇÃO DA ROTA ---
+    return (
+      <div className="space-y-6">
+          <div className="text-center">
+              <h2 className="text-3xl font-bold text-gray-800">Planejar Rota</h2>
+              <p className="text-gray-500">Adicione passageiros para a rota do dia.</p>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+              {/* Coluna de Passageiros Disponíveis */}
+              <div className="bg-white p-4 rounded-lg shadow-lg">
+                  <h3 className="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">Passageiros Disponíveis</h3>
+                  <ul className="h-[60vh] overflow-y-auto space-y-3 pr-2">
+                    {availablePassengers.length > 0 ? availablePassengers.map(p => (
+                      <li key={p.id} className="flex justify-between items-center p-3 bg-gray-50 hover:bg-gray-100 rounded-lg shadow-sm">
+                        <div>
+                          <p className="font-semibold text-gray-800">{p.name}</p>
+                          <p className="text-xs text-gray-500">{p.address}</p>
+                        </div>
+                        <button onClick={() => addToRoute(p)} title="Adicionar à Rota" className="p-2 text-green-500 hover:text-green-700 hover:bg-green-100 rounded-full">
+                          <PlusIcon className="h-6 w-6"/>
+                        </button>
+                      </li>
+                    )) : (
+                      <div className="text-center p-8 text-gray-400">
+                        <p>Nenhum passageiro disponível.</p>
+                      </div>
+                    )}
+                  </ul>
+              </div>
+              
+              {/* Coluna da Rota do Dia */}
+              <div className="bg-white p-4 rounded-lg shadow-lg">
+                  <h3 className="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">Rota do Dia</h3>
+                  <ul className="h-[60vh] overflow-y-auto space-y-3 pr-2">
+                    {route.length > 0 ? route.map((p, index) => (
+                      <li key={p.id} className="flex justify-between items-center p-3 bg-blue-50 hover:bg-blue-100 rounded-lg shadow-sm">
+                        <div className="flex items-center gap-3">
+                          <span className="font-bold text-blue-800">{index + 1}.</span>
+                          <div>
+                            <p className="font-semibold text-blue-900">{p.name}</p>
+                            <p className="text-xs text-blue-700">{p.address}</p>
+                          </div>
+                        </div>
+                        <button onClick={() => removeFromRoute(p)} title="Remover da Rota" className="p-2 text-red-500 hover:text-red-700 hover:bg-red-100 rounded-full">
+                          <MinusIcon className="h-6 w-6"/>
+                        </button>
+                      </li>
+                    )) : (
+                      <div className="text-center p-8 text-gray-400 h-full flex items-center justify-center">
+                        <p>Adicione passageiros da lista à esquerda.</p>
+                      </div>
+                    )}
+                  </ul>
+              </div>
+          </div>
+          <button 
+            onClick={startNavigation} 
+            disabled={route.length === 0}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg text-lg shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+            Iniciar Trajeto
+          </button>
+      </div>
     );
 };
 

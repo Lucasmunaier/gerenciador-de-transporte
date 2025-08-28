@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Passenger, Trip, TripType } from '../types';
 import { useAppContext } from '../contexts/AppContext';
 import { DocumentArrowDownIcon, CheckCircleIcon } from './icons';
@@ -28,8 +28,18 @@ const ChargeModal: React.FC<ChargeModalProps> = ({ passenger, unpaidTrips, onClo
   const { markTripsAsPaid, profile } = useAppContext();
   const modalContentRef = useRef<HTMLDivElement>(null);
   const totalDue = unpaidTrips.reduce((sum, trip) => sum + trip.tripValue, 0);
+  
+  // Novo estado para controlar se o PDF foi baixado
+  const [pdfDownloaded, setPdfDownloaded] = useState(false);
 
-  const handleMarkAsPaid = () => { /* ... */ };
+  const handleMarkAsPaid = () => {
+    if (window.confirm("Confirmar o recebimento deste valor?")) {
+        const tripIdsToPay = unpaidTrips.map(trip => trip.id);
+        markTripsAsPaid(tripIdsToPay);
+        alert(`Pagamento de R$ ${totalDue.toFixed(2)} para ${passenger.name} registrado com sucesso!`);
+        onClose();
+    }
+  };
   
   const handleExportPDF = () => {
     if (modalContentRef.current && window.html2canvas && window.jspdf) {
@@ -43,6 +53,9 @@ const ChargeModal: React.FC<ChargeModalProps> = ({ passenger, unpaidTrips, onClo
         const ratio = pdfWidth / imgWidth;
         pdf.addImage(imgData, 'PNG', 0, 10, pdfWidth, imgHeight * ratio);
         pdf.save(`cobranca_${passenger.name.replace(/\s+/g, '_')}_${new Date().toLocaleDateString('sv')}.pdf`);
+        
+        // Habilita o botão do WhatsApp após o download
+        setPdfDownloaded(true);
       });
     } else {
       alert("Erro ao exportar PDF.");
@@ -55,49 +68,55 @@ const ChargeModal: React.FC<ChargeModalProps> = ({ passenger, unpaidTrips, onClo
       return;
     }
     const phone = `55${passenger.phone.replace(/\D/g, '')}`;
-    
-    // Constrói a mensagem base
     let message = `Olá, ${passenger.name}! A cobrança referente às suas viagens é de R$${totalDue.toFixed(2)}.`;
-
-    // Adiciona a chave PIX à mensagem, se existir
     if (profile?.pix_key) {
       message += `\n\nVocê pode pagar via PIX para a chave:\n*${profile.pix_key}*`;
     }
-
-    message += `\n\nQualquer dúvida, estou à disposição. Obrigado!`;
-
+    message += `\n\nO PDF com os detalhes está em anexo. Qualquer dúvida, estou à disposição. Obrigado!`;
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
   };
   
-  const getTripTypeLabel = (type: TripType | string) => { /* ... */ };
+  const getTripTypeLabel = (type: TripType | string) => {
+    return TRIP_TYPE_OPTIONS.find(opt => opt.value === type)?.label || String(type);
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
         <div ref={modalContentRef} className="p-6 overflow-y-auto">
-            {/* O conteúdo do modal permanece o mesmo */}
+            {/* ... Conteúdo do Modal (lista de viagens, total, etc.) ... */}
         </div>
-        <div className="p-6 border-t border-gray-200 bg-gray-50 flex flex-wrap justify-end gap-3">
-           <button type="button" onClick={onClose} className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100">
-            Fechar
-          </button>
-           <button onClick={handleExportPDF} className="flex items-center justify-center px-4 py-2 border border-gray-500 text-gray-600 rounded-md text-sm font-medium hover:bg-gray-50">
-            <DocumentArrowDownIcon className="w-5 h-5 mr-2" />
-            Exportar PDF
-          </button>
-          {unpaidTrips.length > 0 && (
-            <>
-              <button onClick={handleSendWhatsApp} className="flex items-center justify-center px-4 py-2 bg-green-500 text-white rounded-md text-sm font-medium hover:bg-green-600">
-                <WhatsAppIcon className="w-5 h-5 mr-2" />
-                Enviar via WhatsApp
-              </button>
-              <button onClick={handleMarkAsPaid} className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700">
-                <CheckCircleIcon className="w-5 h-5 mr-2" />
-                Marcar como Pago
-              </button>
-            </>
-          )}
+        
+        {/* --- NOVO LAYOUT DO RODAPÉ --- */}
+        <div className="p-4 border-t bg-gray-50 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3">
+            {/* Botão de Fechar (à esquerda) */}
+            <button type="button" onClick={onClose} className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition-all">
+                Fechar
+            </button>
+            
+            {/* Botões de Ação (à direita) */}
+            {unpaidTrips.length > 0 && (
+                <div className="flex flex-col-reverse sm:flex-row sm:items-center gap-3">
+                    <button onClick={handleMarkAsPaid} className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-all shadow-sm">
+                        <CheckCircleIcon className="w-5 h-5 mr-2" />
+                        Marcar como Pago
+                    </button>
+                    <button 
+                        onClick={handleSendWhatsApp} 
+                        disabled={!pdfDownloaded} 
+                        title={!pdfDownloaded ? "Exporte o PDF primeiro para habilitar" : "Enviar cobrança via WhatsApp"}
+                        className="flex items-center justify-center px-4 py-2 bg-green-500 text-white rounded-md text-sm font-medium hover:bg-green-600 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <WhatsAppIcon className="w-5 h-5 mr-2" />
+                        Enviar via WhatsApp
+                    </button>
+                    <button onClick={handleExportPDF} className={`flex items-center justify-center px-4 py-2 border rounded-md text-sm font-medium transition-all ${pdfDownloaded ? 'bg-gray-200 text-gray-500 border-gray-300' : 'border-gray-400 text-gray-700 hover:bg-gray-50'}`}>
+                        {pdfDownloaded ? <CheckCircleIcon className="w-5 h-5 mr-2 text-green-600" /> : <DocumentArrowDownIcon className="w-5 h-5 mr-2" />}
+                        {pdfDownloaded ? "PDF Exportado" : "Exportar PDF"}
+                    </button>
+                </div>
+            )}
         </div>
       </div>
     </div>

@@ -1,15 +1,16 @@
-// ARQUIVO: components/PassengerForm.tsx (com melhorias na busca)
-
 import React, { useState, useEffect } from 'react';
 import { Passenger } from '../types';
 import { useAppContext } from '../contexts/AppContext';
 import { UserPlusIcon } from './icons';
 
-interface Suggestion {
-  place_id: number;
-  display_name: string;
-  lat: string;
-  lon: string;
+// Interface para o tipo de sugestão da API Geoapify
+interface GeoapifySuggestion {
+  properties: {
+    place_id: string;
+    formatted: string;
+    lat: number;
+    lon: number;
+  };
 }
 
 interface PassengerFormProps {
@@ -27,11 +28,14 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ editingPassenger, onDone 
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
 
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [suggestions, setSuggestions] = useState<GeoapifySuggestion[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
   const [errors, setErrors] = useState<{ name?: string; address?: string; phone?: string; valuePerTrip?: string; latitude?: string; longitude?: string; }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // SUA CHAVE DA API VAI AQUI
+  const GEOAPIFY_API_KEY = "8317afb8ac164227b779b0d6d003679a";
 
   useEffect(() => {
     if (editingPassenger) {
@@ -55,7 +59,7 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ editingPassenger, onDone 
   }, [editingPassenger]);
   
   useEffect(() => {
-    if (address.length < 5) { // Aumentar um pouco o gatilho para evitar buscas muito genéricas
+    if (address.length < 3) {
       setSuggestions([]);
       return;
     }
@@ -63,30 +67,61 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ editingPassenger, onDone 
     const handler = setTimeout(async () => {
       setIsSearching(true);
       try {
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=5&addressdetails=1`);
+        const response = await fetch(`https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(address)}&apiKey=${GEOAPIFY_API_KEY}`);
         const data = await response.json();
-        setSuggestions(data);
+        setSuggestions(data.features || []);
       } catch (error) {
         console.error("Erro ao buscar sugestões:", error);
       } finally {
         setIsSearching(false);
       }
-    }, 500);
+    }, 400); // Um pouco mais rápido para uma melhor experiência
 
     return () => {
       clearTimeout(handler);
     };
   }, [address]);
 
-  const handleSuggestionClick = (suggestion: Suggestion) => {
-    setAddress(suggestion.display_name);
-    setLatitude(suggestion.lat);
-    setLongitude(suggestion.lon);
+  const handleSuggestionClick = (suggestion: GeoapifySuggestion) => {
+    setAddress(suggestion.properties.formatted);
+    setLatitude(suggestion.properties.lat.toString());
+    setLongitude(suggestion.properties.lon.toString());
     setSuggestions([]);
   };
 
-  const validate = () => { /* ... */ return true; };
-  const handleSubmit = async (e: React.FormEvent) => { /* ... */ };
+  const validate = (): boolean => {
+      // Implemente a validação conforme necessário
+      return true;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validate()) return;
+    setIsSubmitting(true);
+
+    const passengerData = {
+      name,
+      address,
+      phone,
+      valuePerTrip: parseFloat(valuePerTrip),
+      notification_distance: notificationDistance ? parseInt(notificationDistance, 10) : null,
+      latitude: latitude ? parseFloat(latitude) : null,
+      longitude: longitude ? parseFloat(longitude) : null,
+    };
+    
+    try {
+      if (editingPassenger) {
+        await updatePassenger({ ...editingPassenger, ...passengerData });
+      } else {
+        await addPassenger(passengerData as any);
+      }
+      onDone();
+    } catch (error) {
+        alert("Erro ao salvar passageiro. Verifique o console.");
+    } finally {
+        setIsSubmitting(false);
+    }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="p-6 bg-white rounded-lg shadow-md space-y-6">
@@ -108,22 +143,20 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ editingPassenger, onDone 
           value={address} 
           onChange={(e) => setAddress(e.target.value)} 
           className="w-full px-4 py-2 border rounded-md shadow-sm"
-          placeholder="Digite o endereço completo (Rua, Nº, Cidade)..." 
+          placeholder="Comece a digitar o endereço..." 
           required 
           autoComplete="off"
         />
-        <p className="text-xs text-gray-500 mt-1">Dica: Para maior precisão, inclua a cidade e o estado na busca.</p>
-
         {isSearching && <div className="absolute top-9 right-3 w-5 h-5 border-t-2 border-blue-500 rounded-full animate-spin"></div>}
         {suggestions.length > 0 && (
           <ul className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
             {suggestions.map((s) => (
               <li 
-                key={s.place_id} 
+                key={s.properties.place_id} 
                 onClick={() => handleSuggestionClick(s)}
                 className="p-3 hover:bg-blue-50 cursor-pointer text-sm"
               >
-                {s.display_name}
+                {s.properties.formatted}
               </li>
             ))}
           </ul>
@@ -168,4 +201,5 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ editingPassenger, onDone 
     </form>
   );
 };
+
 export default PassengerForm;

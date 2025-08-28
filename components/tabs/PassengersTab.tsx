@@ -51,44 +51,34 @@ const PassengersTab: React.FC = () => {
         </button>
       </div>
 
-      <div className="bg-white shadow-xl rounded-lg overflow-hidden">
+      <div>
         {passengers.length === 0 ? (
-          <p className="p-8 text-center text-gray-500 text-lg">Nenhum passageiro registrado ainda.</p>
+          <p className="p-8 text-center text-gray-500 text-lg bg-white rounded-lg shadow-md">Nenhum passageiro registrado ainda.</p>
         ) : (
-          <ul className="divide-y divide-gray-200">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {passengers.map((passenger) => (
-              <li key={passenger.id} className="p-4 sm:p-6 hover:bg-gray-50 transition duration-150 ease-in-out">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-lg sm:text-xl font-semibold text-blue-700 truncate">{passenger.name}</h4>
-                    <p className="text-sm text-gray-600 flex items-center mt-1 truncate">
-                      <MapPinIcon className="w-4 h-4 mr-2 text-gray-400 flex-shrink-0" />
-                      <span className="truncate">{passenger.address}</span>
-                    </p>
-                    <p className="text-sm text-gray-600 mt-1">
-                      Valor por Viagem: <span className="font-medium text-green-600">R$ {passenger.valuePerTrip.toFixed(2)}</span>
-                    </p>
+              <div key={passenger.id} className="bg-white rounded-lg shadow-lg p-5 flex flex-col justify-between transition-all hover:shadow-xl hover:scale-105">
+                <div>
+                  <div className="flex justify-between items-start">
+                    <h4 className="text-xl font-bold text-blue-700 mb-2">{passenger.name}</h4>
+                    <div className="flex space-x-2 flex-shrink-0 ml-2">
+                      <button onClick={() => handleEdit(passenger)} className="p-2 text-yellow-500 hover:bg-yellow-100 rounded-full" title="Editar"><PencilIcon className="w-5 h-5" /></button>
+                      <button onClick={() => handleDelete(passenger.id)} className="p-2 text-red-500 hover:bg-red-100 rounded-full" title="Excluir"><TrashIcon className="w-5 h-5" /></button>
+                    </div>
                   </div>
-                  <div className="flex space-x-3 self-start sm:self-center mt-4 sm:mt-0 sm:ml-4">
-                    <button
-                      onClick={() => handleEdit(passenger)}
-                      className="p-2 text-yellow-500 hover:text-yellow-700 hover:bg-yellow-100 rounded-full transition duration-150"
-                      title="Editar Passageiro"
-                    >
-                      <PencilIcon className="w-5 h-5" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(passenger.id)}
-                      className="p-2 text-red-500 hover:text-red-700 hover:bg-red-100 rounded-full transition duration-150"
-                      title="Excluir Passageiro"
-                    >
-                      <TrashIcon className="w-5 h-5" />
-                    </button>
-                  </div>
+                  <p className="text-sm text-gray-600 flex items-start mt-1">
+                    <MapPinIcon className="w-4 h-4 mr-2 mt-0.5 text-gray-400 flex-shrink-0" />
+                    <span>{passenger.address}</span>
+                  </p>
                 </div>
-              </li>
+                <div className="mt-4 pt-4 border-t border-dashed">
+                    <p className="text-sm text-gray-600">
+                      Valor por Viagem: <span className="font-bold text-lg text-green-600">R$ {passenger.valuePerTrip.toFixed(2)}</span>
+                    </p>
+                </div>
+              </div>
             ))}
-          </ul>
+          </div>
         )}
       </div>
     </div>

@@ -76,40 +76,18 @@ const TripsTab: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg shadow">
-        <div>
-          <label htmlFor="filterPassenger" className="block text-sm font-medium text-gray-700">Filtrar por Passageiro:</label>
-          <select 
-            id="filterPassenger"
-            value={filterPassengerId} 
-            onChange={(e) => setFilterPassengerId(e.target.value)}
-            className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-          >
-            <option value="">Todos os Passageiros</option>
-            {passengers.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-          </select>
-        </div>
-        <div>
-          <label htmlFor="filterTripType" className="block text-sm font-medium text-gray-700">Filtrar por Tipo:</label>
-          <select 
-            id="filterTripType"
-            value={filterTripType}
-            onChange={(e) => setFilterTripType(e.target.value)}
-            className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-          >
-            <option value="">Todos os Tipos</option>
-            {TRIP_TYPE_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-          </select>
-        </div>
+        {/* ... Filtros ... */}
       </div>
     
       <div className="bg-white shadow-xl rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* --- VISUALIZAÇÃO DE TABELA PARA TELAS GRANDES --- */}
+        <div className="hidden sm:block overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
                 <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
                 <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Passageiro</th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Tipo</th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
                 <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
                 <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                 <th scope="col" className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
@@ -120,39 +98,52 @@ const TripsTab: React.FC = () => {
                 <tr key={trip.id} className="hover:bg-gray-50 transition duration-150">
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{new Date(trip.date + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 font-medium">{getPassengerName(trip.passenger_id)}</td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 hidden md:table-cell">{getTripTypeLabel(trip.type)}</td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">{getTripTypeLabel(trip.type)}</td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-green-600 font-medium">R$ {trip.tripValue.toFixed(2)}</td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm">
                     {trip.paid ? (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        <CheckCircleIcon className="w-4 h-4 mr-1" /> Pago
-                      </span>
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"><CheckCircleIcon className="w-4 h-4 mr-1" /> Pago</span>
                     ) : (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                        <XCircleIcon className="w-4 h-4 mr-1" /> Pendente
-                      </span>
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800"><XCircleIcon className="w-4 h-4 mr-1" /> Pendente</span>
                     )}
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium space-x-1">
-                    <button
-                      onClick={() => handleEdit(trip)}
-                      className="p-2 text-yellow-500 hover:text-yellow-700 hover:bg-yellow-100 rounded-full transition duration-150"
-                      title="Editar Viagem"
-                    >
-                      <PencilIcon className="w-5 h-5" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(trip.id)}
-                      className="p-2 text-red-500 hover:text-red-700 hover:bg-red-100 rounded-full transition duration-150"
-                      title="Excluir Viagem"
-                    >
-                      <TrashIcon className="w-5 h-5" />
-                    </button>
+                    <button onClick={() => handleEdit(trip)} className="p-2 text-yellow-500 hover:text-yellow-700 hover:bg-yellow-100 rounded-full" title="Editar"><PencilIcon className="w-5 h-5" /></button>
+                    <button onClick={() => handleDelete(trip.id)} className="p-2 text-red-500 hover:text-red-700 hover:bg-red-100 rounded-full" title="Excluir"><TrashIcon className="w-5 h-5" /></button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* --- VISUALIZAÇÃO DE CARDS PARA CELULAR --- */}
+        <div className="block sm:hidden">
+          <ul className="divide-y divide-gray-200">
+            {filteredTrips.map(trip => (
+              <li key={trip.id} className="p-4 space-y-3">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="font-bold text-gray-800">{getPassengerName(trip.passenger_id)}</p>
+                    <p className="text-sm text-gray-600">{new Date(trip.date + 'T00:00:00').toLocaleDateString('pt-BR')}</p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <button onClick={() => handleEdit(trip)} className="p-2 text-yellow-500 hover:bg-yellow-100 rounded-full"><PencilIcon className="w-5 h-5" /></button>
+                    <button onClick={() => handleDelete(trip.id)} className="p-2 text-red-500 hover:bg-red-100 rounded-full"><TrashIcon className="w-5 h-5" /></button>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-700">{getTripTypeLabel(trip.type)}</span>
+                  <span className="font-bold text-lg text-green-600">R$ {trip.tripValue.toFixed(2)}</span>
+                  {trip.paid ? (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"><CheckCircleIcon className="w-4 h-4 mr-1" /> Pago</span>
+                  ) : (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800"><XCircleIcon className="w-4 h-4 mr-1" /> Pendente</span>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </div>

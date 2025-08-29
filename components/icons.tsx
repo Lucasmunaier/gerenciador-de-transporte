@@ -138,7 +138,10 @@ export const MagnifyingGlassIcon: React.FC<React.SVGProps<SVGSVGElement>> = (pro
 
 export const FuelPumpIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15.58 1.58L14.42 2.74a1 1 0 01-1.41 0l-.7-.7a1 1 0 00-1.41 0l-1.06 1.06a1 1 0 01-1.41 0l-.7-.7a1 1 0 00-1.41 0l-1.06 1.06a1 1 0 01-1.41 0l-.7-.7a1 1 0 00-1.41 0l-2.12 2.12" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3.375 10.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5v6.75a1.5 1.5 0 0 1-1.5 1.5H8.25a1.5 1.5 0 0 1-1.5-1.5V10.5" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 6.75v1.875a.375.375 0 0 0 .375.375h.375a.375.375 0 0 0 .375-.375V6.75h-1.125Z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 10.5a.75.75 0 0 1 .75-.75h.01a.75.75 0 0 1 .75.75v.01a.75.75 0 0 1-.75.75h-.01a.75.75 0 0 1-.75-.75v-.01Z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12.75 10.5a.75.75 0 0 1 .75-.75h.01a.75.75 0 0 1 .75.75v.01a.75.75 0 0 1-.75.75h-.01a.75.75 0 0 1-.75-.75v-.01Z" />
   </svg>
 );

@@ -2,7 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { useAppContext } from '../../contexts/AppContext';
 import FuelLogForm from '../FuelLogForm';
 import { FuelLog } from '../../types';
-import { PencilIcon, TrashIcon, BeakerIcon } from '../icons';
+import { PencilIcon, TrashIcon, FuelPumpIcon } from '../icons';
+
 
 const FuelLogTab: React.FC = () => {
   const { fuelLogs, deleteFuelLog } = useAppContext();
@@ -51,7 +52,7 @@ const FuelLogTab: React.FC = () => {
           onClick={handleAddNew}
           className="w-full sm:w-auto flex items-center justify-center bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150 ease-in-out"
         >
-          <BeakerIcon className="w-5 h-5 mr-2" />
+          <FuelPumpIcon className="w-5 h-5 mr-2" />
           <span className="truncate">Registrar Novo Abastecimento</span>
         </button>
       </div>

@@ -18,7 +18,7 @@ import { APP_TITLE, TAB_NAMES } from './constants';
 import { 
   UserPlusIcon, CalendarDaysIcon, BeakerIcon, CreditCardIcon, ChartBarIcon,
   ChevronDoubleLeftIcon, ChevronDoubleRightIcon, ArrowLeftOnRectangleIcon,
-  Bars3Icon, UserCircleIcon, MapIcon
+  Bars3Icon, UserCircleIcon, MapIcon, FuelPumpIcon 
 } from './components/icons';
 
 // Sub-componente para o aplicativo principal, para poder acessar o contexto
@@ -61,11 +61,12 @@ const MainApp: React.FC<{ user: User }> = ({ user }) => {
       <div className={`flex-grow space-y-2 ${isMinimized ? 'space-y-3' : 'space-y-2'}`}>
         <TabButton tab={Tab.PASSENGERS} icon={<UserPlusIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.PASSENGERS]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
         <TabButton tab={Tab.TRIPS} icon={<CalendarDaysIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.TRIPS]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
-        <TabButton tab={Tab.FUEL_LOGS} icon={<BeakerIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.FUEL_LOGS]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
+        <TabButton tab={Tab.FUEL_LOGS} icon={<FuelPumpIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.FUEL_LOGS]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
         <TabButton tab={Tab.BILLING} icon={<CreditCardIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.BILLING]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
         <TabButton tab={Tab.REPORTS} icon={<ChartBarIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.REPORTS]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
         <TabButton tab={Tab.NAVIGATION} icon={<MapIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.NAVIGATION]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
         <TabButton tab={Tab.PROFILE} icon={<UserCircleIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.PROFILE]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
+        
       </div>
       <button onClick={handleLogout} className={`w-full flex items-center py-2.5 text-sm font-medium rounded-md text-slate-300 hover:bg-slate-700 hover:text-slate-100 transition-colors duration-150 ${isMinimized ? 'justify-center px-2' : 'justify-start space-x-3 px-3'}`} title="Sair">
           <ArrowLeftOnRectangleIcon className="w-5 h-5 flex-shrink-0" /> {!isMinimized && <span className="truncate">Sair</span>}

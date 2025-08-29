@@ -44,7 +44,7 @@ const ChargeModal: React.FC<ChargeModalProps> = ({ passenger, unpaidTrips, onClo
   const handleExportPDF = () => {
     if (modalContentRef.current && window.html2canvas && window.jspdf) {
       const { jsPDF } = window.jspdf;
-      window.html2canvas(modalContentRef.current, { scale: 2, scrollY: -window.scrollY }).then((canvas) => {
+      window.html2canvas(modalContentRef.current, { scale: 2 }).then((canvas) => {
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF('p', 'mm', 'a4');
         const pdfWidth = pdf.internal.pageSize.getWidth();

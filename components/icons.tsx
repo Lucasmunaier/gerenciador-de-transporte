@@ -150,9 +150,6 @@ export const FuelPumpIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => 
   </svg>
 );
 
-// ARQUIVO: components/icons.tsx
-
-// Adicione este novo ícone no final do arquivo
 export const LocationMarkerIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
     <g>

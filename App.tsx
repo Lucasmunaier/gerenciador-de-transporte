@@ -17,9 +17,9 @@ import MainPage from './components/MainPage';
 import { Tab } from './types';
 import { APP_TITLE, TAB_NAMES } from './constants';
 import { 
-  UserPlusIcon, CalendarDaysIcon, BeakerIcon, CreditCardIcon, ChartBarIcon,
+  UserPlusIcon, CalendarDaysIcon, FuelPumpIcon, CreditCardIcon, ChartBarIcon,
   ChevronDoubleLeftIcon, ChevronDoubleRightIcon, ArrowLeftOnRectangleIcon,
-  Bars3Icon, UserCircleIcon, LocationMarkerIcon, FuelPumpIcon
+  Bars3Icon, UserCircleIcon, LocationMarkerIcon
 } from './components/icons';
 
 // Sub-componente para o aplicativo principal, para poder acessar o contexto
@@ -61,47 +61,55 @@ const MainApp: React.FC<{ user: User }> = ({ user }) => {
 
   const SidebarContent = ({ isMinimized, onMobileNavClick }: { isMinimized: boolean, onMobileNavClick?: () => void }) => (
     <>
+      {!isMinimized && (
+        <div className="mb-6 text-center">
+          <p className="text-sm text-gray-400">Usuário:</p>
+          <p className="font-semibold text-white truncate">{profile?.username || profile?.full_name || user.email}</p>
+        </div>
+      )}
       <div className={`flex-grow space-y-2 ${isMinimized ? 'space-y-3' : 'space-y-2'}`}>
+        {/* Ordem solicitada pelo usuário */}
+        <TabButton tab={Tab.MAIN_PAGE} icon={<Bars3Icon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.MAIN_PAGE]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
+        <TabButton tab={Tab.PROFILE} icon={<UserCircleIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.PROFILE]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
         <TabButton tab={Tab.PASSENGERS} icon={<UserPlusIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.PASSENGERS]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
         <TabButton tab={Tab.TRIPS} icon={<CalendarDaysIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.TRIPS]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
+        <TabButton tab={Tab.NAVIGATION} icon={<LocationMarkerIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.NAVIGATION]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
         <TabButton tab={Tab.FUEL_LOGS} icon={<FuelPumpIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.FUEL_LOGS]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
         <TabButton tab={Tab.BILLING} icon={<CreditCardIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.BILLING]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
         <TabButton tab={Tab.REPORTS} icon={<ChartBarIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.REPORTS]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
-        <TabButton tab={Tab.NAVIGATION} icon={<LocationMarkerIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.NAVIGATION]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
-        <TabButton tab={Tab.PROFILE} icon={<UserCircleIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.PROFILE]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
       </div>
-      <button onClick={handleLogout} className={`w-full flex items-center py-2.5 text-sm font-medium rounded-md text-slate-300 hover:bg-slate-700 hover:text-slate-100 transition-colors duration-150 ${isMinimized ? 'justify-center px-2' : 'justify-start space-x-3 px-3'}`} title="Sair">
-          <ArrowLeftOnRectangleIcon className="w-5 h-5 flex-shrink-0" /> {!isMinimized && <span className="truncate">Sair</span>}
-      </button>
-      <div className="hidden lg:block">
-        <button onClick={() => setIsSidebarMinimized(!isSidebarMinimized)} className={`mt-2 w-full flex items-center py-2.5 text-sm font-medium rounded-md text-slate-300 hover:bg-slate-700 hover:text-slate-100 transition-colors duration-150 ${isMinimized ? 'justify-center px-2' : 'justify-start space-x-3 px-3'}`} title={isSidebarMinimized ? "Expandir Menu" : "Minimizar Menu"}>
-          {isSidebarMinimized ? <ChevronDoubleRightIcon className="w-5 h-5 flex-shrink-0" /> : <ChevronDoubleLeftIcon className="w-5 h-5 flex-shrink-0" />} {!isMinimized && <span className="truncate">Minimizar</span>}
+      <div className="flex-shrink-0">
+        <button onClick={handleLogout} className={`w-full flex items-center py-2.5 text-sm font-medium rounded-md text-slate-300 hover:bg-slate-700 hover:text-slate-100 transition-colors duration-150 ${isMinimized ? 'justify-center px-2' : 'justify-start space-x-3 px-3'}`} title="Sair">
+            <ArrowLeftOnRectangleIcon className="w-5 h-5 flex-shrink-0" /> {!isMinimized && <span className="truncate">Sair</span>}
         </button>
+        <div className="hidden lg:block">
+          <button onClick={() => setIsSidebarMinimized(!isSidebarMinimized)} className={`mt-2 w-full flex items-center py-2.5 text-sm font-medium rounded-md text-slate-300 hover:bg-slate-700 hover:text-slate-100 transition-colors duration-150 ${isMinimized ? 'justify-center px-2' : 'justify-start space-x-3 px-3'}`} title={isSidebarMinimized ? "Expandir Menu" : "Minimizar Menu"}>
+            {isSidebarMinimized ? <ChevronDoubleRightIcon className="w-5 h-5 flex-shrink-0" /> : <ChevronDoubleLeftIcon className="w-5 h-5 flex-shrink-0" />} {!isMinimized && <span className="truncate">Minimizar</span>}
+          </button>
+        </div>
       </div>
     </>
   );
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-100 to-sky-100 text-gray-800">
-      <header className="bg-white shadow-lg sticky top-0 z-30">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
-          <div className="flex-1 flex justify-start">
-            {activeTab !== Tab.MAIN_PAGE && (
+      {activeTab !== Tab.MAIN_PAGE && (
+        <header className="bg-white shadow-lg sticky top-0 z-30">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+            <div className="flex-1 flex justify-start">
               <button onClick={() => setMobileSidebarOpen(true)} className="lg:hidden p-2 -ml-2 text-gray-600 hover:text-blue-700">
                 <Bars3Icon className="w-6 h-6"/>
               </button>
-            )}
-          </div>
-          <div className="flex-1 text-center">
-            <h1 className="text-xl sm:text-2xl font-bold text-blue-700 tracking-tight whitespace-nowrap">{APP_TITLE}</h1>
-          </div>
-          <div className="flex-1 flex justify-end">
-            <div className="hidden sm:block text-sm text-gray-600 text-right">
-              Usuário: <span className="font-semibold">{profile?.username || profile?.full_name || user.email}</span>
+            </div>
+            <div className="flex-1 text-center">
+              <h1 className="text-xl sm:text-2xl font-bold text-blue-700 tracking-tight whitespace-nowrap cursor-pointer" onClick={() => setActiveTab(Tab.MAIN_PAGE)}>{APP_TITLE}</h1>
+            </div>
+            <div className="flex-1 flex justify-end">
+              {/* Username foi movido para a barra lateral */}
             </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
       <div className="flex flex-1 overflow-hidden">
         {activeTab !== Tab.MAIN_PAGE && (
           <>
@@ -115,7 +123,7 @@ const MainApp: React.FC<{ user: User }> = ({ user }) => {
           </>
         )}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
-          <div className="bg-gray-50 p-4 sm:p-6 rounded-xl shadow-2xl min-h-full">
+          <div className={`bg-gray-50 p-4 sm:p-6 rounded-xl min-h-full ${activeTab !== Tab.MAIN_PAGE ? 'shadow-2xl' : ''}`}>
             {renderTabContent()}
           </div>
         </main>

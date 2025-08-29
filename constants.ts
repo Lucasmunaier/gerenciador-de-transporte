@@ -5,14 +5,14 @@ import { Tab, TripType } from './types';
 export const APP_TITLE = "GERENCIADOR DE CARONA";
 
 export const TAB_NAMES: Record<Tab, string> = {
-  [Tab.MAIN_PAGE]: "Página Principal",
+  [Tab.MAIN_PAGE]: "Início",
   [Tab.PASSENGERS]: "Gerenciar Passageiros",
   [Tab.TRIPS]: "Registro de Viagens",
   [Tab.FUEL_LOGS]: "Abastecimentos",
   [Tab.BILLING]: "Cobrança",
   [Tab.REPORTS]: "Relatórios",
   [Tab.PROFILE]: "Meu Perfil",
-  [Tab.NAVIGATION]: "Navegação", // Novo
+  [Tab.NAVIGATION]: "Navegação",
 };
 
 export const TRIP_TYPE_OPTIONS = [

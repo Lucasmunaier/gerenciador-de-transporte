@@ -29,7 +29,6 @@ const ChargeModal: React.FC<ChargeModalProps> = ({ passenger, unpaidTrips, onClo
   const modalContentRef = useRef<HTMLDivElement>(null);
   const totalDue = unpaidTrips.reduce((sum, trip) => sum + trip.tripValue, 0);
   
-  // Novo estado para controlar se o PDF foi baixado
   const [pdfDownloaded, setPdfDownloaded] = useState(false);
 
   const handleMarkAsPaid = () => {
@@ -42,9 +41,20 @@ const ChargeModal: React.FC<ChargeModalProps> = ({ passenger, unpaidTrips, onClo
   };
   
   const handleExportPDF = () => {
-    if (modalContentRef.current && window.html2canvas && window.jspdf) {
+    const element = modalContentRef.current;
+    if (element && window.html2canvas && window.jspdf) {
       const { jsPDF } = window.jspdf;
-      window.html2canvas(modalContentRef.current, { scale: 2 }).then((canvas) => {
+
+      const originalScrollTop = element.scrollTop;
+      element.scrollTop = 0;
+
+      window.html2canvas(element, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        useCORS: true,
+      }).then((canvas) => {
+        element.scrollTop = originalScrollTop;
+
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF('p', 'mm', 'a4');
         const pdfWidth = pdf.internal.pageSize.getWidth();
@@ -54,11 +64,14 @@ const ChargeModal: React.FC<ChargeModalProps> = ({ passenger, unpaidTrips, onClo
         pdf.addImage(imgData, 'PNG', 0, 10, pdfWidth, imgHeight * ratio);
         pdf.save(`cobranca_${passenger.name.replace(/\s+/g, '_')}_${new Date().toLocaleDateString('sv')}.pdf`);
         
-        // Habilita o botão do WhatsApp após o download
         setPdfDownloaded(true);
+      }).catch(err => {
+        element.scrollTop = originalScrollTop;
+        console.error("Erro no html2canvas:", err);
+        alert("Ocorreu um erro ao tentar exportar o PDF.");
       });
     } else {
-      alert("Erro ao exportar PDF.");
+      alert("Não foi possível encontrar os recursos para exportar o PDF.");
     }
   };
 
@@ -85,10 +98,47 @@ const ChargeModal: React.FC<ChargeModalProps> = ({ passenger, unpaidTrips, onClo
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
         <div ref={modalContentRef} className="p-6 overflow-y-auto">
-            {/* ... Conteúdo do Modal (lista de viagens, total, etc.) ... */}
+          {/* --- CONTEÚDO RESTAURADO AQUI --- */}
+          <h3 id="chargeModalTitle" className="text-2xl font-semibold text-gray-800 mb-2">Cobrança para {passenger.name}</h3>
+          <p className="text-sm text-gray-600 mb-6">Endereço: {passenger.address}</p>
+
+          {unpaidTrips.length === 0 ? (
+            <p className="text-gray-600 text-center py-8">Nenhuma viagem pendente de pagamento para este passageiro.</p>
+          ) : (
+            <>
+              <h4 className="text-lg font-medium text-gray-700 mb-3">Viagens Pendentes:</h4>
+              <div className="border border-gray-200 rounded-md mb-4">
+                <ul className="divide-y divide-gray-200 max-h-[40vh] overflow-y-auto">
+                  {unpaidTrips.map(trip => (
+                    <li key={trip.id} className="px-4 py-3 flex justify-between items-center text-sm hover:bg-gray-50">
+                      <div>
+                        <span className="font-medium text-gray-700">{new Date(trip.date + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span> 
+                        <span className="text-gray-500"> - {getTripTypeLabel(trip.type)}</span>
+                      </div>
+                      <span className="font-semibold text-green-600">R$ {trip.tripValue.toFixed(2)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              {profile?.pix_key && (
+                <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-sm text-blue-800">
+                        <strong>Chave PIX para pagamento:</strong>
+                        <span className="font-mono ml-2 bg-blue-100 px-2 py-1 rounded">{profile.pix_key}</span>
+                    </p>
+                </div>
+              )}
+              <div className="mt-6 pt-4 border-t border-gray-300">
+                <div className="flex justify-end items-center">
+                  <span className="text-lg font-semibold text-gray-700 mr-2">Total a Pagar:</span>
+                  <span className="text-2xl font-bold text-blue-700">R$ {totalDue.toFixed(2)}</span>
+                </div>
+              </div>
+            </>
+          )}
         </div>
         
-        {/* --- NOVO LAYOUT DO RODAPÉ --- */}
+        {/* --- RODAPÉ COM NOVO LAYOUT --- */}
         <div className="p-4 border-t bg-gray-50 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3">
             {/* Botão de Fechar (à esquerda) */}
             <button type="button" onClick={onClose} className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition-all">

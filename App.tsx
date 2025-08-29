@@ -62,9 +62,11 @@ const MainApp: React.FC<{ user: User }> = ({ user }) => {
   const SidebarContent = ({ isMinimized, onMobileNavClick }: { isMinimized: boolean, onMobileNavClick?: () => void }) => (
     <>
       {!isMinimized && (
-        <div className="mb-6 text-center">
-          <p className="text-sm text-gray-400">Usuário:</p>
-          <p className="font-semibold text-white truncate">{profile?.username || profile?.full_name || user.email}</p>
+        <div className="mb-6 px-1">
+          <p className="text-sm text-gray-300 truncate">
+            <span className="text-gray-400">Usuário: </span>
+            <span className="font-semibold text-white">{profile?.username || profile?.full_name || user.email}</span>
+          </p>
         </div>
       )}
       <div className={`flex-grow space-y-2 ${isMinimized ? 'space-y-3' : 'space-y-2'}`}>
@@ -79,14 +81,14 @@ const MainApp: React.FC<{ user: User }> = ({ user }) => {
         <TabButton tab={Tab.REPORTS} icon={<ChartBarIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.REPORTS]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
       </div>
       <div className="flex-shrink-0">
-        <button onClick={handleLogout} className={`w-full flex items-center py-2.5 text-sm font-medium rounded-md text-slate-300 hover:bg-slate-700 hover:text-slate-100 transition-colors duration-150 ${isMinimized ? 'justify-center px-2' : 'justify-start space-x-3 px-3'}`} title="Sair">
-            <ArrowLeftOnRectangleIcon className="w-5 h-5 flex-shrink-0" /> {!isMinimized && <span className="truncate">Sair</span>}
-        </button>
         <div className="hidden lg:block">
-          <button onClick={() => setIsSidebarMinimized(!isSidebarMinimized)} className={`mt-2 w-full flex items-center py-2.5 text-sm font-medium rounded-md text-slate-300 hover:bg-slate-700 hover:text-slate-100 transition-colors duration-150 ${isMinimized ? 'justify-center px-2' : 'justify-start space-x-3 px-3'}`} title={isSidebarMinimized ? "Expandir Menu" : "Minimizar Menu"}>
+          <button onClick={() => setIsSidebarMinimized(!isSidebarMinimized)} className={`mb-2 w-full flex items-center py-2.5 text-sm font-medium rounded-md text-slate-300 hover:bg-slate-700 hover:text-slate-100 transition-colors duration-150 ${isMinimized ? 'justify-center px-2' : 'justify-start space-x-3 px-3'}`} title={isSidebarMinimized ? "Expandir Menu" : "Minimizar Menu"}>
             {isSidebarMinimized ? <ChevronDoubleRightIcon className="w-5 h-5 flex-shrink-0" /> : <ChevronDoubleLeftIcon className="w-5 h-5 flex-shrink-0" />} {!isMinimized && <span className="truncate">Minimizar</span>}
           </button>
         </div>
+        <button onClick={handleLogout} className={`w-full flex items-center py-2.5 text-sm font-medium rounded-md text-slate-300 hover:bg-slate-700 hover:text-slate-100 transition-colors duration-150 ${isMinimized ? 'justify-center px-2' : 'justify-start space-x-3 px-3'}`} title="Sair">
+            <ArrowLeftOnRectangleIcon className="w-5 h-5 flex-shrink-0" /> {!isMinimized && <span className="truncate">Sair</span>}
+        </button>
       </div>
     </>
   );

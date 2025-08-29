@@ -23,7 +23,7 @@ const MainPage: React.FC<MainPageProps> = ({ setActiveTab }) => {
 
   return (
     <div className="text-center">
-      <img src="/favicon.png" alt="Logo" className="w-auto h-40 mx-auto mb-4" />
+      <img src="/favicon.png" alt="Logo" className="w-auto h-30 mx-auto mb-4" />
       <h1 className="text-4xl font-bold text-gray-800 mb-2">{APP_TITLE}</h1>
       <p className="text-lg text-gray-600 mb-8">Seu assistente para gerenciamento de transporte.</p>
 

@@ -124,12 +124,6 @@ export const GoogleIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   </svg>
 );
 
-export const MapIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9 20.25l6-4.5-6-4.5-6 4.5 6 4.5zm0 0v-8.25M15 15.75l6-4.5-6-4.5-6 4.5 6 4.5zM3 8.25l6 4.5 6-4.5-6-4.5-6 4.5z" />
-  </svg>
-);
-
 export const MagnifyingGlassIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
@@ -156,4 +150,8 @@ export const LocationMarkerIcon: React.FC<React.SVGProps<SVGSVGElement>> = (prop
       <path d="M5.7 15C4.03377 15.6353 3 16.5205 3 17.4997C3 19.4329 7.02944 21 12 21C16.9706 21 21 19.4329 21 17.4997C21 16.5205 19.9662 15.6353 18.3 15M12 9H12.01M18 9C18 13.0637 13.5 15 12 18C10.5 15 6 13.0637 6 9C6 5.68629 8.68629 3 12 3C15.3137 3 18 5.68629 18 9ZM13 9C13 9.55228 12.5523 10 12 10C11.4477 10 11 9.55228 11 9C11 8.44772 11.4477 8 12 8C12.5523 8 13 8.44772 13 9Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
     </g>
   </svg>
+);
+
+export const WhatsAppIcon: React.FC<{className?: string}> = ({className}) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className || "h-6 w-6"} fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.894 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.886-.001 2.267.651 4.39 1.88 6.161l-1.331 4.869 4.869-1.332zM8.371 9.973c-.09-.272-.18-.272-.26-.272h-.15c-.09 0-.25.04-.38.21s-.51.51-.51 1.25.51 1.44.57 1.53c.06.09 1.03 1.63 2.51 2.2.37.14.63.18.82.12.2-.06.63-.26.72-.51s.09-.47 0-.51-.09-.09-.18-.18c-.09-.09-.24-.15-.38-.21-.12-.04-.27-.06-.38-.06s-.26.03-.38.09c-.12.06-.27.21-.38.33-.09.12-.18.15-.24.06-.06-.09-.27-.24-.51-.47s-.42-.42-.47-.51c-.06-.09-.03-.12 0-.18.03-.04.09-.12.18-.18.06-.04.09-.06.12-.12s.03-.12 0-.18c-.03-.06-.12-.18-.18-.18z"/></svg>
 );

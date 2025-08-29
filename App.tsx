@@ -18,7 +18,7 @@ import { APP_TITLE, TAB_NAMES } from './constants';
 import { 
   UserPlusIcon, CalendarDaysIcon, BeakerIcon, CreditCardIcon, ChartBarIcon,
   ChevronDoubleLeftIcon, ChevronDoubleRightIcon, ArrowLeftOnRectangleIcon,
-  Bars3Icon, UserCircleIcon, MapIcon, FuelPumpIcon, LocationMarkerIcon
+  Bars3Icon, UserCircleIcon, LocationMarkerIcon, FuelPumpIcon
 } from './components/icons';
 
 // Sub-componente para o aplicativo principal, para poder acessar o contexto

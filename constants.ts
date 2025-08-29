@@ -5,6 +5,7 @@ import { Tab, TripType } from './types';
 export const APP_TITLE = "GERENCIADOR DE CARONA";
 
 export const TAB_NAMES: Record<Tab, string> = {
+  [Tab.MAIN_PAGE]: "Página Principal",
   [Tab.PASSENGERS]: "Gerenciar Passageiros",
   [Tab.TRIPS]: "Registro de Viagens",
   [Tab.FUEL_LOGS]: "Abastecimentos",

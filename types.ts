@@ -39,6 +39,7 @@ export interface AppContextType {
   deleteFuelLog: (fuelLogId: string) => Promise<void>;
 }
 export enum Tab {
+  MAIN_PAGE = 'MAIN_PAGE',
   PASSENGERS = 'PASSENGERS', TRIPS = 'TRIPS', FUEL_LOGS = 'FUEL_LOGS',
   BILLING = 'BILLING', REPORTS = 'REPORTS', PROFILE = 'PROFILE',
   NAVIGATION = 'NAVIGATION' // Nova aba

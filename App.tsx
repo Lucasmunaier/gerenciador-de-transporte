@@ -13,6 +13,7 @@ import Register from './components/Register';
 import ForgotPassword from './components/ForgotPassword';
 import CompleteProfile from './components/CompleteProfile';
 import NavigationTab from './components/tabs/NavigationTab';
+import MainPage from './components/MainPage';
 import { Tab } from './types';
 import { APP_TITLE, TAB_NAMES } from './constants';
 import { 
@@ -24,7 +25,7 @@ import {
 // Sub-componente para o aplicativo principal, para poder acessar o contexto
 const MainApp: React.FC<{ user: User }> = ({ user }) => {
   const { profile } = useAppContext();
-  const [activeTab, setActiveTab] = useState<Tab>(Tab.PASSENGERS);
+  const [activeTab, setActiveTab] = useState<Tab>(Tab.MAIN_PAGE);
   const [isSidebarMinimized, setIsSidebarMinimized] = useState(false);
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
@@ -46,7 +47,9 @@ const MainApp: React.FC<{ user: User }> = ({ user }) => {
       case Tab.REPORTS: return <ReportsTab />;
       case Tab.NAVIGATION: return <NavigationTab />;
       case Tab.PROFILE: return <ProfileTab />;
-      default: return null;
+      case Tab.MAIN_PAGE:
+      default:
+        return <MainPage setActiveTab={setActiveTab} />;
     }
   };
 
@@ -83,9 +86,11 @@ const MainApp: React.FC<{ user: User }> = ({ user }) => {
       <header className="bg-white shadow-lg sticky top-0 z-30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
           <div className="flex-1 flex justify-start">
-            <button onClick={() => setMobileSidebarOpen(true)} className="lg:hidden p-2 -ml-2 text-gray-600 hover:text-blue-700">
-              <Bars3Icon className="w-6 h-6"/>
-            </button>
+            {activeTab !== Tab.MAIN_PAGE && (
+              <button onClick={() => setMobileSidebarOpen(true)} className="lg:hidden p-2 -ml-2 text-gray-600 hover:text-blue-700">
+                <Bars3Icon className="w-6 h-6"/>
+              </button>
+            )}
           </div>
           <div className="flex-1 text-center">
             <h1 className="text-xl sm:text-2xl font-bold text-blue-700 tracking-tight whitespace-nowrap">{APP_TITLE}</h1>
@@ -98,13 +103,17 @@ const MainApp: React.FC<{ user: User }> = ({ user }) => {
         </div>
       </header>
       <div className="flex flex-1 overflow-hidden">
-        <div className={`fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden transition-opacity ${isMobileSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setMobileSidebarOpen(false)} aria-hidden="true"></div>
-        <nav className={`fixed inset-y-0 left-0 bg-slate-800 text-white p-5 flex flex-col z-50 transform transition-transform duration-300 ease-in-out lg:hidden ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`} style={{ width: '15rem' }}>
-          <SidebarContent isMinimized={false} onMobileNavClick={() => setMobileSidebarOpen(false)} />
-        </nav>
-        <nav className={`hidden lg:flex flex-shrink-0 bg-slate-800 text-white overflow-y-auto flex-col transition-all duration-300 ease-in-out ${isSidebarMinimized ? 'w-20 p-3' : 'w-60 p-5'}`} aria-label="Main navigation">
-           <SidebarContent isMinimized={isSidebarMinimized}/>
-        </nav>
+        {activeTab !== Tab.MAIN_PAGE && (
+          <>
+            <div className={`fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden transition-opacity ${isMobileSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setMobileSidebarOpen(false)} aria-hidden="true"></div>
+            <nav className={`fixed inset-y-0 left-0 bg-slate-800 text-white p-5 flex flex-col z-50 transform transition-transform duration-300 ease-in-out lg:hidden ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`} style={{ width: '15rem' }}>
+              <SidebarContent isMinimized={false} onMobileNavClick={() => setMobileSidebarOpen(false)} />
+            </nav>
+            <nav className={`hidden lg:flex flex-shrink-0 bg-slate-800 text-white overflow-y-auto flex-col transition-all duration-300 ease-in-out ${isSidebarMinimized ? 'w-20 p-3' : 'w-60 p-5'}`} aria-label="Main navigation">
+              <SidebarContent isMinimized={isSidebarMinimized}/>
+            </nav>
+          </>
+        )}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
           <div className="bg-gray-50 p-4 sm:p-6 rounded-xl shadow-2xl min-h-full">
             {renderTabContent()}

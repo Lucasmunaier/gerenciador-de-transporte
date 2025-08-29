@@ -64,7 +64,6 @@ const MainApp: React.FC<{ user: User }> = ({ user }) => {
         <TabButton tab={Tab.FUEL_LOGS} icon={<FuelPumpIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.FUEL_LOGS]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
         <TabButton tab={Tab.BILLING} icon={<CreditCardIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.BILLING]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
         <TabButton tab={Tab.REPORTS} icon={<ChartBarIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.REPORTS]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
-        <TabButton tab={Tab.NAVIGATION} icon={<MapIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.NAVIGATION]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
         <TabButton tab={Tab.NAVIGATION} icon={<LocationMarkerIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.NAVIGATION]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
         <TabButton tab={Tab.PROFILE} icon={<UserCircleIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.PROFILE]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
       </div>

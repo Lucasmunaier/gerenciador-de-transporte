@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FuelLog } from '../types';
 import { useAppContext } from '../contexts/AppContext';
-import { BeakerIcon } from './icons';
+import { FuelPumpIcon } from './icons';
 
 interface FuelLogFormProps {
   editingFuelLog: FuelLog | null;
@@ -79,7 +79,7 @@ const FuelLogForm: React.FC<FuelLogFormProps> = ({ editingFuelLog, onDone }) => 
   return (
     <form onSubmit={handleSubmit} className="p-6 bg-white rounded-lg shadow-md space-y-6">
       <h3 className="text-2xl font-semibold text-gray-700 mb-6 flex items-center">
-        <BeakerIcon className="w-8 h-8 mr-3 text-purple-600" />
+        <FuelPumpIcon className="w-8 h-8 mr-3 text-purple-600" />
         {editingFuelLog ? 'Editar Abastecimento' : 'Registrar Novo Abastecimento'}
       </h3>
 

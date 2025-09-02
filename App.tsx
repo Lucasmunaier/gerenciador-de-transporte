@@ -16,7 +16,7 @@ import NavigationTab from './components/tabs/NavigationTab';
 import MainPage from './components/MainPage';
 import AboutTab from './components/tabs/AboutTab';
 import ContactTab from './components/tabs/ContactTab';
-import LandingPage from './components/LandingPage'; // <-- Importe a nova página
+import LandingPage from './components/LandingPage';
 import { Tab } from './types';
 import { APP_TITLE, TAB_NAMES } from './constants';
 import { 
@@ -25,7 +25,7 @@ import {
   Bars3Icon, UserCircleIcon, LocationMarkerIcon
 } from './components/icons';
 
-// ... (O componente MainApp continua o mesmo de antes)
+// O componente MainApp continua o mesmo
 const MainApp: React.FC<{ user: User }> = ({ user }) => {
   const { profile } = useAppContext();
   const [activeTab, setActiveTab] = useState<Tab>(Tab.MAIN_PAGE);
@@ -143,10 +143,10 @@ const MainApp: React.FC<{ user: User }> = ({ user }) => {
   );
 }
 
+
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  // O estado agora pode ser 'landing', 'login', 'register', ou 'forgotPassword'
   const [view, setView] = useState<'landing' | 'login' | 'register' | 'forgotPassword'>('landing');
   
   useEffect(() => {
@@ -156,20 +156,23 @@ const App: React.FC = () => {
       setLoading(false);
     };
     getSession();
+
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      // Se o usuário deslogar, volta para a landing page
+      // Se a sessão se tornar nula (logout), reseta a view para a landing page
       if (!session?.user) {
         setView('landing');
       }
       setUser(session?.user ?? null);
       setLoading(false);
     });
-    return () => { authListener?.subscription.unsubscribe(); };
+
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
   }, []);
 
   if (loading) { return <div className="flex items-center justify-center min-h-screen">Carregando...</div>; }
   
-  // Se não há usuário logado, mostra as páginas públicas
   if (!user) {
     switch (view) {
       case 'register': return <Register onNavigateToLogin={() => setView('login')} />;
@@ -181,7 +184,6 @@ const App: React.FC = () => {
     }
   }
 
-  // Se há um usuário logado, mostra o aplicativo principal
   return (
     <AppProvider user={user}>
       <MainApp user={user} />

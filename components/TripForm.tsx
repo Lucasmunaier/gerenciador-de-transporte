@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Trip, TripType } from '../types';
 import { useAppContext } from '../contexts/AppContext';
 import { TRIP_TYPE_OPTIONS } from '../constants';
-import { CalendarDaysIcon, ArrowPathIcon } from './icons';
+import { CalendarDaysIcon } from './icons';
 
 interface TripFormProps {
   editingTrip: Trip | null;
@@ -91,7 +91,7 @@ const TripForm: React.FC<TripFormProps> = ({ editingTrip, onDone }) => {
   return (
     <form onSubmit={handleSubmit} className="p-6 bg-white rounded-lg shadow-md space-y-6">
       <h3 className="text-2xl font-semibold text-gray-700 mb-6 flex items-center">
-        {editingTrip ? <ArrowPathIcon className="w-8 h-8 mr-3 text-green-600" /> : <CalendarDaysIcon className="w-8 h-8 mr-3 text-blue-600" />}
+        {editingTrip ? <CalendarDaysIcon className="w-8 h-8 mr-3 text-green-600" /> : <CalendarDaysIcon className="w-8 h-8 mr-3 text-blue-600" />}
         {editingTrip ? 'Editar Viagem' : 'Registrar Nova Viagem'}
       </h3>
 

@@ -53,7 +53,7 @@ const MainApp: React.FC<{ user: User }> = ({ user }) => {
       case Tab.CONTACT: return <ContactTab />;
       case Tab.MAIN_PAGE:
       default:
-        return <MainPage setActiveTab={setActiveTab} />;
+        return <MainPage setActiveTab={setActiveTab} handleLogout={handleLogout} />;
     }
   };
 

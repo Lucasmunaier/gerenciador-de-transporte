@@ -4,10 +4,20 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  // Garante que os caminhos dos assets sejam relativos
+  base: './', 
   plugins: [
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      // Habilita o Service Worker também no modo de desenvolvimento para facilitar testes
+      devOptions: {
+        enabled: true
+      },
+      // Configuração explícita do Workbox para garantir o cache de todos os assets
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,jpg,jpeg}']
+      },
       includeAssets: ['favicon.png', 'icon-192.png', 'icon-512.png', 'maskable-icon.png'],
       manifest: {
         name: 'Gerenciador de Transporte',

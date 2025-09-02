@@ -177,7 +177,7 @@ const App: React.FC = () => {
     switch (view) {
       case 'register': return <Register onNavigateToLogin={() => setView('login')} />;
       case 'forgotPassword': return <ForgotPassword onNavigateToLogin={() => setView('login')} />;
-      case 'login': return <Login onNavigateToRegister={() => setView('register')} onNavigateToForgotPassword={() => setView('forgotPassword')} />;
+      case 'login': return <Login onNavigateToRegister={() => setView('register')} onNavigateToForgotPassword={() => setView('forgotPassword')} onNavigateToLanding={() => setView('landing')} />;
       case 'landing':
       default:
         return <LandingPage onNavigateToLogin={() => setView('login')} onNavigateToRegister={() => setView('register')} />;

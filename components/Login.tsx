@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { supabase } from '../supabaseClient';
-import { GoogleIcon } from './icons';
+import { GoogleIcon, ArrowLeftIcon } from './icons'; // Importe o ArrowLeftIcon
 
 interface LoginProps {
   onNavigateToRegister: () => void;
   onNavigateToForgotPassword: () => void;
+  onNavigateToLanding: () => void; // Nova propriedade para voltar
 }
 
-const Login: React.FC<LoginProps> = ({ onNavigateToRegister, onNavigateToForgotPassword }) => {
+const Login: React.FC<LoginProps> = ({ onNavigateToRegister, onNavigateToForgotPassword, onNavigateToLanding }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -42,8 +43,17 @@ const Login: React.FC<LoginProps> = ({ onNavigateToRegister, onNavigateToForgotP
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-200 to-sky-200 p-4">
-      <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
-        <h2 className="text-2xl font-bold text-blue-700 mb-6 text-center">Gerenciador de Carona</h2>
+      <div className="relative bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+        {/* Botão de Voltar Adicionado */}
+        <button
+          onClick={onNavigateToLanding}
+          className="absolute top-4 left-4 p-2 text-gray-500 hover:text-blue-700 hover:bg-gray-100 rounded-full transition-colors"
+          title="Voltar para a Página Inicial"
+        >
+          <ArrowLeftIcon className="w-6 h-6" />
+        </button>
+
+        <h2 className="text-2xl font-bold text-blue-700 mb-6 text-center">Login</h2>
         {error && <p className="text-red-500 mb-4 bg-red-100 p-3 rounded-md text-center">{error}</p>}
         <form onSubmit={handleLogin}>
           <div className="mb-4">

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciador de Transporte</title>
+    <title>Gerenciador de Carona</title>
 
     <link rel="icon" type="image/png" href="/favicon.png" className="w-20 h-18 mx-auto mb-4" />
 
@@ -62,20 +62,5 @@
 <body class="bg-gray-100">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          // Use an absolute path based on the current origin to avoid cross-origin issues
-          const swUrl = `${window.location.origin}/sw.js`;
-          navigator.serviceWorker.register(swUrl)
-            .then(registration => {
-              console.log('Service Worker registered with scope:', registration.scope);
-            })
-            .catch(error => {
-              console.error('Service Worker registration failed:', error);
-            });
-        });
-      }
-    </script>
 </body>
 </html>

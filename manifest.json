@@ -1,7 +1,7 @@
 {
-  "name": "Gerenciador de Transporte",
-  "short_name": "Transporte",
-  "description": "Aplicativo para gerenciar passageiros, viagens, abastecimentos, cobranças e relatórios de transporte.",
+  "name": "Gerenciador de Carona",
+  "short_name": "Carona",
+  "description": "Aplicativo para gerenciar passageiros, viagens, abastecimentos, cobranças e relatórios de carona.",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#f1f5f9",

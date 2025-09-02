@@ -5,9 +5,10 @@ import { CheckCircleIcon } from './icons';
 interface LandingPageProps {
   onNavigateToRegister: () => void;
   onNavigateToLogin: () => void;
+  onNavigateToContact: () => void; // <-- Nova propriedade
 }
 
-const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToRegister, onNavigateToLogin }) => {
+const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToRegister, onNavigateToLogin, onNavigateToContact }) => {
   const features = [
     "Gerenciamento completo de passageiros",
     "Registro detalhado de viagens",
@@ -71,6 +72,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToRegister, onNavig
       {/* Rodapé Público */}
       <footer className="bg-gray-800 text-white py-8">
         <div className="container mx-auto px-6 text-center">
+          {/* Link para Fale Conosco adicionado aqui */}
+          <div className="mb-4">
+            <button onClick={onNavigateToContact} className="text-gray-300 hover:text-white hover:underline">
+              Fale Conosco
+            </button>
+          </div>
           <p>&copy; {new Date().getFullYear()} {APP_TITLE}. Todos os direitos reservados.</p>
         </div>
       </footer>

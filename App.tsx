@@ -22,7 +22,7 @@ import { APP_TITLE, TAB_NAMES } from './constants';
 import { 
   UserPlusIcon, CalendarDaysIcon, FuelPumpIcon, CreditCardIcon, ChartBarIcon,
   ChevronDoubleLeftIcon, ChevronDoubleRightIcon, ArrowLeftOnRectangleIcon,
-  Bars3Icon, UserCircleIcon, LocationMarkerIcon
+  Bars3Icon, UserCircleIcon, LocationMarkerIcon, ArrowLeftIcon
 } from './components/icons';
 
 // O componente MainApp continua o mesmo
@@ -143,11 +143,32 @@ const MainApp: React.FC<{ user: User }> = ({ user }) => {
   );
 }
 
+// Componente para a página de Contato pública
+const PublicContactPage: React.FC<{ onNavigateToLanding: () => void }> = ({ onNavigateToLanding }) => (
+  <div className="min-h-screen bg-slate-100">
+    <header className="bg-white shadow-sm">
+      <div className="container mx-auto px-6 py-4 flex justify-between items-center">
+        <div className="flex items-center space-x-2 cursor-pointer" onClick={onNavigateToLanding}>
+          <img src="/favicon.png" alt="Logo" className="w-8 h-8" />
+          <span className="font-bold text-xl text-blue-700">{APP_TITLE}</span>
+        </div>
+        <button onClick={onNavigateToLanding} className="flex items-center text-gray-600 hover:text-blue-600 font-semibold">
+          <ArrowLeftIcon className="w-5 h-5 mr-2" />
+          Voltar
+        </button>
+      </div>
+    </header>
+    <main className="p-4 sm:p-6 lg:p-8">
+      <ContactTab />
+    </main>
+  </div>
+);
+
 
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState<'landing' | 'login' | 'register' | 'forgotPassword'>('landing');
+  const [view, setView] = useState<'landing' | 'login' | 'register' | 'forgotPassword' | 'contact'>('landing');
   
   useEffect(() => {
     const getSession = async () => {
@@ -158,7 +179,6 @@ const App: React.FC = () => {
     getSession();
 
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      // Se a sessão se tornar nula (logout), reseta a view para a landing page
       if (!session?.user) {
         setView('landing');
       }
@@ -178,9 +198,10 @@ const App: React.FC = () => {
       case 'register': return <Register onNavigateToLogin={() => setView('login')} />;
       case 'forgotPassword': return <ForgotPassword onNavigateToLogin={() => setView('login')} />;
       case 'login': return <Login onNavigateToRegister={() => setView('register')} onNavigateToForgotPassword={() => setView('forgotPassword')} onNavigateToLanding={() => setView('landing')} />;
+      case 'contact': return <PublicContactPage onNavigateToLanding={() => setView('landing')} />;
       case 'landing':
       default:
-        return <LandingPage onNavigateToLogin={() => setView('login')} onNavigateToRegister={() => setView('register')} />;
+        return <LandingPage onNavigateToLogin={() => setView('login')} onNavigateToRegister={() => setView('register')} onNavigateToContact={() => setView('contact')} />;
     }
   }
 

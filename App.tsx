@@ -14,6 +14,9 @@ import ForgotPassword from './components/ForgotPassword';
 import CompleteProfile from './components/CompleteProfile';
 import NavigationTab from './components/tabs/NavigationTab';
 import MainPage from './components/MainPage';
+import AboutTab from './components/tabs/AboutTab';
+import ContactTab from './components/tabs/ContactTab';
+import LandingPage from './components/LandingPage'; // <-- Importe a nova página
 import { Tab } from './types';
 import { APP_TITLE, TAB_NAMES } from './constants';
 import { 
@@ -22,14 +25,13 @@ import {
   Bars3Icon, UserCircleIcon, LocationMarkerIcon
 } from './components/icons';
 
-// Sub-componente para o aplicativo principal, para poder acessar o contexto
+// ... (O componente MainApp continua o mesmo de antes)
 const MainApp: React.FC<{ user: User }> = ({ user }) => {
   const { profile } = useAppContext();
   const [activeTab, setActiveTab] = useState<Tab>(Tab.MAIN_PAGE);
   const [isSidebarMinimized, setIsSidebarMinimized] = useState(false);
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-  // Se o perfil existe mas não tem username, mostra a tela para completar
   if (profile && !profile.username) {
     return <CompleteProfile />;
   }
@@ -47,6 +49,8 @@ const MainApp: React.FC<{ user: User }> = ({ user }) => {
       case Tab.REPORTS: return <ReportsTab />;
       case Tab.NAVIGATION: return <NavigationTab />;
       case Tab.PROFILE: return <ProfileTab />;
+      case Tab.ABOUT: return <AboutTab />;
+      case Tab.CONTACT: return <ContactTab />;
       case Tab.MAIN_PAGE:
       default:
         return <MainPage setActiveTab={setActiveTab} />;
@@ -70,7 +74,6 @@ const MainApp: React.FC<{ user: User }> = ({ user }) => {
         </div>
       )}
       <div className={`flex-grow space-y-2 ${isMinimized ? 'space-y-3' : 'space-y-2'}`}>
-        {/* Ordem solicitada pelo usuário */}
         <TabButton tab={Tab.MAIN_PAGE} icon={<Bars3Icon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.MAIN_PAGE]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
         <TabButton tab={Tab.PROFILE} icon={<UserCircleIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.PROFILE]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
         <TabButton tab={Tab.PASSENGERS} icon={<UserPlusIcon className="w-5 h-5 flex-shrink-0" />} label={TAB_NAMES[Tab.PASSENGERS]} isMinimized={isMinimized} onClick={onMobileNavClick}/>
@@ -106,9 +109,7 @@ const MainApp: React.FC<{ user: User }> = ({ user }) => {
             <div className="flex-1 text-center">
               <h1 className="text-xl sm:text-2xl font-bold text-blue-700 tracking-tight whitespace-nowrap cursor-pointer" onClick={() => setActiveTab(Tab.MAIN_PAGE)}>{APP_TITLE}</h1>
             </div>
-            <div className="flex-1 flex justify-end">
-              {/* Username foi movido para a barra lateral */}
-            </div>
+            <div className="flex-1 flex justify-end"></div>
           </div>
         </header>
       )}
@@ -131,6 +132,10 @@ const MainApp: React.FC<{ user: User }> = ({ user }) => {
         </main>
       </div>
       <footer className="py-4 text-center text-sm text-gray-500 border-t border-gray-200 bg-white">
+        <div className="flex justify-center space-x-6 mb-2">
+          <button onClick={() => setActiveTab(Tab.ABOUT)} className="hover:text-blue-600 hover:underline">Sobre</button>
+          <button onClick={() => setActiveTab(Tab.CONTACT)} className="hover:text-blue-600 hover:underline">Fale Conosco</button>
+        </div>
         <p>&copy; {new Date().getFullYear()} {APP_TITLE}. Todos os direitos reservados.</p>
         <p className="mt-1 text-xs text-gray-400">By: Munaier</p>
       </footer>
@@ -141,7 +146,8 @@ const MainApp: React.FC<{ user: User }> = ({ user }) => {
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState<'login' | 'register' | 'forgotPassword'>('login');
+  // O estado agora pode ser 'landing', 'login', 'register', ou 'forgotPassword'
+  const [view, setView] = useState<'landing' | 'login' | 'register' | 'forgotPassword'>('landing');
   
   useEffect(() => {
     const getSession = async () => {
@@ -151,6 +157,10 @@ const App: React.FC = () => {
     };
     getSession();
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      // Se o usuário deslogar, volta para a landing page
+      if (!session?.user) {
+        setView('landing');
+      }
       setUser(session?.user ?? null);
       setLoading(false);
     });
@@ -159,14 +169,19 @@ const App: React.FC = () => {
 
   if (loading) { return <div className="flex items-center justify-center min-h-screen">Carregando...</div>; }
   
+  // Se não há usuário logado, mostra as páginas públicas
   if (!user) {
     switch (view) {
       case 'register': return <Register onNavigateToLogin={() => setView('login')} />;
       case 'forgotPassword': return <ForgotPassword onNavigateToLogin={() => setView('login')} />;
-      default: return <Login onNavigateToRegister={() => setView('register')} onNavigateToForgotPassword={() => setView('forgotPassword')} />;
+      case 'login': return <Login onNavigateToRegister={() => setView('register')} onNavigateToForgotPassword={() => setView('forgotPassword')} />;
+      case 'landing':
+      default:
+        return <LandingPage onNavigateToLogin={() => setView('login')} onNavigateToRegister={() => setView('register')} />;
     }
   }
 
+  // Se há um usuário logado, mostra o aplicativo principal
   return (
     <AppProvider user={user}>
       <MainApp user={user} />

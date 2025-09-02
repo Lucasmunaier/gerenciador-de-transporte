@@ -13,6 +13,8 @@ export const TAB_NAMES: Record<Tab, string> = {
   [Tab.REPORTS]: "Relatórios",
   [Tab.PROFILE]: "Meu Perfil",
   [Tab.NAVIGATION]: "Navegação",
+  [Tab.ABOUT]: "Sobre",
+  [Tab.CONTACT]: "Fale Conosco",
 };
 
 export const TRIP_TYPE_OPTIONS = [

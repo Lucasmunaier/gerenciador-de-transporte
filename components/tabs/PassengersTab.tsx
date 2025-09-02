@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAppContext } from '../../contexts/AppContext';
 import PassengerForm from '../PassengerForm';
 import { Passenger } from '../../types';
-import { PencilIcon, TrashIcon, UserPlusIcon, MapPinIcon } from '../icons';
+import { PencilIcon, TrashIcon, UserPlusIcon, LocationMarkerIcon } from '../icons';
 
 const PassengersTab: React.FC = () => {
   const { passengers, deletePassenger } = useAppContext();
@@ -67,7 +67,7 @@ const PassengersTab: React.FC = () => {
                     </div>
                   </div>
                   <p className="text-sm text-gray-600 flex items-start mt-1">
-                    <MapPinIcon className="w-4 h-4 mr-2 mt-0.5 text-gray-400 flex-shrink-0" />
+                    <LocationMarkerIcon className="w-4 h-4 mr-2 mt-0.5 text-gray-400 flex-shrink-0" />
                     <span>{passenger.address}</span>
                   </p>
                 </div>
